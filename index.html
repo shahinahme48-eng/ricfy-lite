@@ -23,7 +23,7 @@
     .top-bar-overlay {
       position: absolute; top: 10px; left: 10px; right: 10px;
       display: flex; justify-content: space-between; z-index: 100;
-      pointer-events: none; /* Let clicks pass through except buttons */
+      pointer-events: none;
     }
 
     .coin-badge {
@@ -237,9 +237,9 @@
 <!-- FIREBASE & LOGIC -->
 <script type="module">
   // ============================================
-  // 🟢 ADMIN SETTINGS (CHANGE YOUR NUMBER HERE)
-  const ADMIN_WHATSAPP = "971566932862"; 
- ============================================
+  // ✅ FIXED NUMBER (Note: Use Quotes " ")
+  const ADMIN_WHATSAPP = "971566932862";
+  // ============================================
 
   document.getElementById("waLink").href = `https://wa.me/${ADMIN_WHATSAPP}?text=Hello Admin, I need help with Domino Game coins.`;
 
@@ -260,6 +260,7 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+  // --- STATE ---
   let myName = localStorage.getItem("dominoName") || "";
   if(myName) document.getElementById("playerName").value = myName;
   
@@ -267,8 +268,15 @@
   let roomId = "";
   let selectedPlayers = 2;
   let selectedBet = 100;
-  let myCoins = parseInt(localStorage.getItem("dominoCoins")) || 2000;
+  let myCoins = parseInt(localStorage.getItem("dominoCoins"));
 
+  // First time User? Give 2000 Coins
+  if(!myCoins && myCoins !== 0) {
+      myCoins = 2000;
+      localStorage.setItem("dominoCoins", myCoins);
+  }
+
+  // Update Coin Display immediately
   document.getElementById("userCoins").innerText = myCoins;
 
   signInAnonymously(auth).catch(e=>console.error(e));
@@ -310,7 +318,7 @@
     await setDoc(doc(db,"rooms",roomId), {
       status: "lobby",
       config: { max: selectedPlayers, bet: selectedBet },
-      players: { p1: { name: myName, tiles: [], gift: 0 } }, // gift field added
+      players: { p1: { name: myName, tiles: [], gift: 0 } },
       board: [], tiles: generateTiles(), turn: "p1", winner: null
     });
     enterLobby();
@@ -452,56 +460,43 @@
     const ref = doc(db,"rooms",roomId);
     const snap = await getDoc(ref);
     const g = snap.data();
-    
     if(g.turn !== myPlayerId) return;
 
     let t = g.players[myPlayerId].tiles[idx];
-    let played = false;
+    let played=false;
 
-    // Board Logic
-    if(g.board.length === 0) { 
-        g.board.push(t); 
-        played = true; 
-    } else {
-      let l = g.board[0].a;
-      let r = g.board[g.board.length-1].b;
-      
-      // Match Logic
-      if(r === t.a){ g.board.push(t); played=true; }
-      else if(r === t.b){ g.board.push({a:t.b, b:t.a}); played=true; } // Flip
-      else if(l === t.b){ g.board.unshift(t); played=true; }
-      else if(l === t.a){ g.board.unshift({a:t.b, b:t.a}); played=true; } // Flip
+    if(!g.board.length) { g.board.push(t); played=true; }
+    else {
+      let l=g.board[0].a, r=g.board[g.board.length-1].b;
+      if(r===t.a){ g.board.push(t); played=true; }
+      else if(r===t.b){ g.board.push({a:t.b,b:t.a}); played=true; }
+      else if(l===t.b){ g.board.unshift(t); played=true; }
+      else if(l===t.a){ g.board.unshift({a:t.b,b:t.a}); played=true; }
     }
 
     if(!played) return alert("❌ Invalid Move! Tile doesn't match.");
-
-    // Remove tile from hand
     g.players[myPlayerId].tiles.splice(idx,1);
 
-    // WIN CHECK
-    if(g.players[myPlayerId].tiles.length === 0){
-        await updateDoc(ref, { status:"finished", winner:myPlayerId });
-    } else {
-        // NEXT TURN logic
-        let ids = Object.keys(g.players).sort();
-        let next = ids[(ids.indexOf(myPlayerId)+1) % ids.length];
-        await updateDoc(ref, { board:g.board, players:g.players, turn:next });
+    if(!g.players[myPlayerId].tiles.length) await updateDoc(ref, { status:"finished", winner:myPlayerId });
+    else {
+      let ids = Object.keys(g.players).sort();
+      let next = ids[(ids.indexOf(myPlayerId)+1)%ids.length];
+      await updateDoc(ref, { board:g.board, players:g.players, turn:next });
     }
   }
 
-  // DRAW TILE FUNCTION
   window.drawTile = async function(){
     const ref = doc(db,"rooms",roomId);
     const snap = await getDoc(ref);
     const g = snap.data();
-    
-    if(g.turn !== myPlayerId) return;
-    if(!g.tiles.length) return alert("⚠️ Boneyard is Empty!");
-    
+    if(g.turn!==myPlayerId) return;
+    if(!g.tiles.length) return alert("⚠️ Boneyard Empty!");
     g.players[myPlayerId].tiles.push(g.tiles.pop());
     await updateDoc(ref,{players:g.players, tiles:g.tiles});
   }
-
+</scrg.players[myPlayerId].tiles.push(g.tiles.pop());
+    await updateDoc(ref,{players:g.players, tiles:g.tiles});
+  }
 </script>
 </body>
 </html>
