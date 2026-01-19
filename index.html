@@ -2,179 +2,174 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Domino Pro Real</title>
+  <title>Domino Pro Ultimate</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    /* --- BASIC --- */
+    /* --- CORE --- */
     body { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; user-select: none; }
 
-    /* --- THE TABLE (Deep Green Felt with Wood) --- */
+    /* --- TABLE (Darker Vignette for Focus) --- */
     #table {
       width: 100vw; height: 100vh;
-      background: radial-gradient(circle, #1e6028 0%, #0d2e11 100%);
+      /* মাঝখানে আলো, চারপাশে অন্ধকার (Spotlight Effect) */
+      background: radial-gradient(circle at center, #1e6028 20%, #051a07 100%);
       position: relative;
       display: flex; flex-direction: column; justify-content: space-between;
-      box-shadow: inset 0 0 150px rgba(0,0,0,0.9);
     }
     #table::before {
       content: ""; position: absolute; top:0; left:0; right:0; bottom:0;
-      border: 15px solid #5d4037;
-      border-image: linear-gradient(to bottom right, #6d4c41, #3e2723) 1;
+      border: 12px solid #3e2723;
+      box-shadow: inset 0 0 100px #000; /* Deep Shadow edges */
       pointer-events: none; z-index: 10;
     }
 
-    /* --- BOARD AREA (Auto Scaling) --- */
+    /* --- BOARD --- */
     #boardArea {
       flex: 1; display: flex; align-items: center; justify-content: center;
       overflow: hidden; position: relative; width: 100%;
     }
     #boardScroll {
       display: flex; align-items: center; justify-content: center;
-      padding: 50px;
-      transition: transform 0.3s ease;
+      padding: 50px; transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
-    /* --- 3D REALISTIC TILES --- */
+    /* --- TILES --- */
     .tile {
-      background: linear-gradient(135deg, #fffbf0 0%, #e6dfcc 100%);
-      border-radius: 6px;
-      box-shadow: 1px 1px 0px #bdae88, 2px 2px 0px #bdae88, 3px 3px 0px #bdae88, 4px 4px 10px rgba(0,0,0,0.6);
-      position: relative;
-      display: flex;
-      cursor: pointer;
-      box-sizing: border-box;
-      border: 1px solid #d4c5a9;
-      margin: 2px;
+      background: linear-gradient(135deg, #fffbf0 0%, #dcd0b0 100%);
+      border-radius: 5px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.8);
+      position: relative; display: flex; box-sizing: border-box;
+      border: 1px solid #999; margin: 1px;
     }
-    .tile::after {
-      content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 50%;
-      background: linear-gradient(to bottom, rgba(255,255,255,0.7), transparent);
-      border-radius: 6px 6px 0 0; pointer-events: none;
-    }
-    
-    .tile-h { width: 74px; height: 37px; flex-direction: row; }
-    .tile-v { width: 37px; height: 74px; flex-direction: column; }
+    .tile-h { width: 64px; height: 32px; flex-direction: row; }
+    .tile-v { width: 32px; height: 64px; flex-direction: column; }
+    .line-h { width: 1px; height: 100%; background: #bdc3c7; }
+    .line-v { width: 100%; height: 1px; background: #bdc3c7; }
 
-    .line-h { width: 2px; height: 100%; background: linear-gradient(to bottom, transparent, #bdae88, transparent); }
-    .line-v { width: 100%; height: 2px; background: linear-gradient(to right, transparent, #bdae88, transparent); }
+    /* Pips */
+    .pips { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 3px; }
+    .dot { width: 5px; height: 5px; background: #000; border-radius: 50%; margin: auto; box-shadow: inset 0 1px 1px rgba(255,255,255,0.9); }
 
-    /* --- ENGRAVED PIPS --- */
-    .pips {
-      flex: 1; display: grid; 
-      grid-template-columns: repeat(3, 1fr); 
-      grid-template-rows: repeat(3, 1fr);
-      padding: 4px;
-    }
-    .dot {
-      width: 7px; height: 7px; 
-      background: radial-gradient(circle, #1a1a1a, #000);
-      border-radius: 50%; margin: auto; 
-      box-shadow: inset 0 1px 2px rgba(255,255,255,0.8), 0 1px 0 rgba(255,255,255,0.3);
-    }
-
-    /* --- MY HAND --- */
+    /* --- MY HAND (Smart Lighting) --- */
     .my-area {
-      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+      background: linear-gradient(to top, #000 0%, transparent 100%);
       padding: 10px; display: flex; flex-direction: column; align-items: center; z-index: 20;
     }
-    .my-hand {
-      display: flex; gap: 10px; overflow-x: auto; padding: 15px; max-width: 100%;
-    }
+    .my-hand { display: flex; gap: 10px; overflow-x: auto; padding: 20px 10px; max-width: 100%; }
+
     .hand-tile {
-      width: 40px; height: 80px; 
-      background: linear-gradient(135deg, #fffbf0 0%, #e6dfcc 100%);
+      width: 38px; height: 76px; 
+      background: #e0e0e0; /* Default Dim Color */
       display: flex; flex-direction: column;
-      border-radius: 6px; 
-      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-      transition: transform 0.2s; border: 1px solid #d4c5a9;
+      border-radius: 6px; box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+      transition: all 0.3s; opacity: 0.5; /* Dark by default */
+      transform: scale(0.9);
     }
-    .hand-tile:active { transform: scale(0.9); }
+
+    /* 🔥 PLAYABLE TILE (Lights Up) */
+    .playable {
+      background: linear-gradient(135deg, #fff 0%, #fffbf0 100%);
+      opacity: 1 !important;
+      transform: scale(1.1) !important;
+      box-shadow: 0 0 15px #ffd700, 0 0 5px white !important; /* Gold Glow */
+      border: 2px solid gold;
+      cursor: pointer;
+      animation: bounce 1s infinite alternate;
+    }
+    @keyframes bounce { from { transform: translateY(0) scale(1.1); } to { transform: translateY(-5px) scale(1.1); } }
+
+    /* --- GAME OVER MODAL --- */
+    .modal {
+      display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9); z-index: 3000;
+      flex-direction: column; justify-content: center; align-items: center;
+      animation: fadeIn 0.5s;
+    }
+    .winner-box {
+      background: linear-gradient(135deg, #ffd700, #ff8c00);
+      padding: 30px; border-radius: 20px; text-align: center;
+      box-shadow: 0 0 50px gold; border: 5px solid white;
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
     
     /* --- OTHER UI --- */
     .top-bar { position: absolute; top: 20px; left: 20px; z-index: 20; display: flex; gap: 10px; }
-    .badge { background: rgba(0,0,0,0.6); color: gold; padding: 5px 15px; border-radius: 20px; font-weight: bold; border: 1px solid gold; box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
-    
-    .opponents { display: flex; justify-content: center; gap: 20px; padding-top: 25px; z-index: 15; }
-    .avatar { width: 50px; height: 50px; border-radius: 50%; background: #444; border: 2px solid #ccc; position: relative; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-    .avatar img { width: 100%; height: 100%; border-radius: 50%; }
-    .card-count { position: absolute; bottom: -5px; right: -5px; background: red; color: white; width: 20px; height: 20px; border-radius: 50%; font-size: 10px; font-weight: bold; display: flex; justify-content: center; align-items: center; border: 2px solid white; }
-    .active-player { border-color: gold; box-shadow: 0 0 20px gold; animation: pulse 1.5s infinite; }
-    
-    @keyframes pulse { 0% { box-shadow: 0 0 10px gold; } 50% { box-shadow: 0 0 25px gold; } 100% { box-shadow: 0 0 10px gold; } }
+    .badge { background: rgba(0,0,0,0.6); color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; border: 1px solid #555; display:flex; align-items:center; gap:5px;}
+    .opponents { display: flex; justify-content: center; gap: 15px; padding-top: 25px; z-index: 15; }
+    .avatar { width: 55px; height: 55px; border-radius: 50%; background: #333; border: 2px solid #555; position: relative; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.8); }
+    .avatar img { width: 100%; height: 100%; border-radius: 50%; opacity: 0.6; }
+    .active-player img { opacity: 1; }
+    .active-player { border-color: #4ade80; box-shadow: 0 0 20px #4ade80; transform: scale(1.1); transition: 0.3s; }
+    .card-count { position: absolute; bottom: -5px; right: -5px; background: #ef4444; color: white; width: 22px; height: 22px; border-radius: 50%; font-size: 11px; font-weight: bold; display: flex; justify-content: center; align-items: center; border: 2px solid white; }
 
-    #boneyardModal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
-    .boneyard-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 80%; }
-    .facedown-tile { width: 40px; height: 70px; background: linear-gradient(135deg, #bdae88 0%, #5d4037 100%); border: 2px solid #fff; border-radius: 4px; cursor: pointer; box-shadow: 0 5px 15px black; }
-    
-    #login { position: absolute; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle, #2c3e50 0%, #000 100%); z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
-    input { padding: 12px; margin: 10px; border-radius: 5px; border: none; text-align: center; font-size: 16px; }
-    .btn { padding: 12px 30px; margin: 5px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; }
-    .btn-gold { background: linear-gradient(to bottom, #ffd700, #ff8c00); color: black; }
+    /* Login & Boneyard CSS */
+    #login { position: absolute; top:0; left:0; width:100%; height:100%; background: #111; z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
+    input { padding: 12px; margin: 10px; border-radius: 8px; border: 1px solid #333; background:#222; color:white; text-align: center; font-size: 16px; width: 200px; }
+    .btn { padding: 12px 30px; margin: 5px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; }
+    .btn:active { transform: scale(0.95); }
+    .btn-gold { background: linear-gradient(to bottom, #facc15, #ca8a04); color: black; }
+    .boneyard-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 80%; }
+    .facedown-tile { width: 36px; height: 68px; background: linear-gradient(135deg, #a8a29e 0%, #44403c 100%); border: 2px solid #d6d3d1; border-radius: 4px; cursor: pointer; }
+
   </style>
 </head>
 <body>
 
-<!-- === LOGIN === -->
+<!-- === LOGIN SCREEN === -->
 <div id="login">
   <img src="https://cdn-icons-png.flaticon.com/512/566/566324.png" width="80" style="margin-bottom:20px;">
-  <h1 style="margin:0; text-transform:uppercase; letter-spacing:2px; color:gold;">Domino Pro</h1>
-  <p style="color:#aaa;">Online Multiplayer</p>
+  <h1 style="margin:0; text-transform:uppercase; letter-spacing:2px; color:#facc15;">Domino Pro</h1>
   
-  <input id="pName" placeholder="Enter Nickname">
-  
+  <input id="pName" placeholder="Your Nickname">
+  <button class="btn btn-gold" onclick="createRoom()">Create New Table</button>
+  <p style="color:#555; font-size:12px;">- OR -</p>
   <div style="display:flex; gap:10px;">
-    <button class="btn btn-gold" onclick="createRoom()">Create Table</button>
-  </div>
-  <p>- OR -</p>
-  <div style="display:flex; gap:10px;">
-    <input id="code" placeholder="Room Code" style="width:100px; margin:0;">
+    <input id="code" placeholder="Room Code" style="width:100px; margin:10px 0;">
     <button class="btn" style="background:#fff;" onclick="joinRoom()">Join</button>
   </div>
 </div>
 
-<!-- === BONEYARD POPUP === -->
-<div id="boneyardModal">
-  <h2 style="color:white; margin-bottom:20px;">Draw a Domino</h2>
-  <div class="boneyard-grid" id="boneyardGrid"></div>
-  <button onclick="closeBoneyard()" style="margin-top:30px; padding:10px 20px; background:red; color:white; border:none; border-radius:5px; cursor:pointer;">Cancel</button>
+<!-- === GAME OVER POPUP === -->
+<div id="gameOverModal" class="modal">
+  <div class="winner-box">
+    <h1 style="font-size: 40px; margin:0;">🏆 WINNER!</h1>
+    <h2 id="winnerName" style="color: black; margin: 10px;">Player Name</h2>
+    <div style="font-size: 50px;">🎉</div>
+    <button onclick="location.reload()" class="btn" style="background:black; color:white; margin-top:20px;">Play Again</button>
+  </div>
 </div>
 
-<!-- === MAIN TABLE === -->
+<!-- === BONEYARD === -->
+<div id="boneyardModal" class="modal">
+  <h2 style="color:white;">Draw Tile</h2>
+  <div class="boneyard-grid" id="boneyardGrid"></div>
+  <button onclick="closeBoneyard()" style="margin-top:20px; padding:10px; background:#333; color:white; border:none; border-radius:5px;">Cancel</button>
+</div>
+
+<!-- === TABLE === -->
 <div id="table">
-  
   <div class="top-bar">
     <div class="badge"><i class="fas fa-wifi"></i> <span id="roomInfo">...</span></div>
-    <div class="badge">💰 <span id="myCoins">2000</span></div>
   </div>
 
-  <!-- Opponents -->
   <div class="opponents" id="opponents"></div>
 
-  <!-- Board -->
   <div id="boardArea">
     <div id="boardScroll"></div>
   </div>
 
-  <!-- My Hand -->
   <div class="my-area">
-    <div style="display:flex; justify-content:space-between; width:100%; margin-bottom:5px;">
-        <span id="turnMsg" style="color:white; font-weight:bold;">Connecting...</span>
-        <button id="drawBtn" onclick="openBoneyard()" style="background:#ff8c00; border:none; padding:5px 15px; border-radius:15px; font-weight:bold; cursor:pointer; color:black; display:none;">
-           Draw from Boneyard
-        </button>
-    </div>
+    <div id="turnMsg" style="color:white; font-weight:bold; margin-bottom:5px; font-size:14px;">Connecting...</div>
     <div class="my-hand" id="myHand"></div>
   </div>
-
 </div>
 
 <!-- FIREBASE & LOGIC -->
 <script type="module">
-  // 🟢 CONFIGURATION
-  const ADMIN_WHATSAPP = "971566932862";
+  const ADMIN_WHATSAPP = "971566932862"; 
 
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
   import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
@@ -196,31 +191,25 @@
   let myId, roomId, myName;
   signInAnonymously(auth);
 
-  // --- DOT HELPER ---
-  const dotPos = {
-    0: [], 1: [4], 2: [2,6], 3: [2,4,6], 
-    4: [0,2,6,8], 5: [0,2,4,6,8], 6: [0,2,3,5,6,8]
-  };
+  // --- UTILS ---
+  const dotPos = { 0: [], 1: [4], 2: [2,6], 3: [2,4,6], 4: [0,2,6,8], 5: [0,2,4,6,8], 6: [0,2,3,5,6,8] };
   function getPips(n) {
-    let h = "";
-    for(let i=0; i<9; i++) h += dotPos[n].includes(i) ? `<div class="dot"></div>` : `<div></div>`;
+    let h = ""; for(let i=0; i<9; i++) h += dotPos[n].includes(i) ? `<div class="dot"></div>` : `<div></div>`;
     return `<div class="pips">${h}</div>`;
   }
 
-  // --- ROOM LOGIC ---
+  // --- GAME START ---
   window.createRoom = async () => {
     myName = document.getElementById("pName").value || "Host";
-    roomId = Math.random().toString(36).substring(2,7).toUpperCase();
+    roomId = Math.random().toString(36).substring(2,6).toUpperCase();
     myId = "p1";
-    let tiles = [];
-    for(let i=0;i<=6;i++) for(let j=i;j<=6;j++) tiles.push({a:i,b:j});
+    let tiles = []; for(let i=0;i<=6;i++) for(let j=i;j<=6;j++) tiles.push({a:i,b:j});
     tiles.sort(()=>Math.random()-0.5);
 
     await setDoc(doc(db,"rooms",roomId), {
-      board: [], tiles: tiles, turn: "p1",
+      board: [], tiles: tiles, turn: "p1", status: "playing",
       players: { p1: { name: myName, tiles: [] } }
     });
-    // Give 7 tiles
     setTimeout(()=>drawTiles(7), 800);
     enterGame();
   };
@@ -230,16 +219,14 @@
     roomId = document.getElementById("code").value.toUpperCase();
     const ref = doc(db,"rooms",roomId);
     const snap = await getDoc(ref);
-    if(!snap.exists()) return alert("Room Invalid");
-
+    if(!snap.exists()) return alert("Invalid Room");
+    
     let d = snap.data();
-    let count = Object.keys(d.players).length;
-    if(count >= 4) return alert("Room Full");
+    if(Object.keys(d.players).length >= 4) return alert("Room Full");
 
-    myId = "p"+(count+1);
+    myId = "p"+(Object.keys(d.players).length+1);
     d.players[myId] = { name: myName, tiles: [] };
     await updateDoc(ref, { players: d.players });
-    // Give 7 tiles
     setTimeout(()=>drawTiles(7), 800);
     enterGame();
   };
@@ -260,142 +247,138 @@
     onSnapshot(doc(db,"rooms",roomId), (snap) => render(snap.data()));
   }
 
-  // --- RENDER ---
+  // --- RENDER ENGINE ---
   function render(g){
-    // 1. Status
+    // Game Over Check
+    if(g.status === "finished") {
+        document.getElementById("gameOverModal").style.display = "flex";
+        document.getElementById("winnerName").innerText = g.players[g.winner]?.name || "Unknown";
+        return;
+    }
+
     let isTurn = (g.turn === myId);
     let turnName = g.players[g.turn].name;
-    document.getElementById("turnMsg").innerHTML = isTurn ? 
-        `<span style="color:#4ade80">🟢 YOUR TURN</span>` : 
-        `<span style="color:#ffcc00">⏳ ${turnName}'s Turn</span>`;
+    
+    // 1. Status & Draw Button (Auto trigger modal if must draw)
+    if(isTurn) {
+        document.getElementById("turnMsg").innerHTML = `<span style="color:#4ade80">🟢 YOUR TURN</span>`;
+        if(!canPlayAny(g) && g.tiles.length > 0 && document.getElementById("boneyardModal").style.display === "none"){
+             openBoneyard(); // Auto open if no move possible
+        }
+    } else {
+        document.getElementById("turnMsg").innerHTML = `<span style="color:#aaa">Waiting for ${turnName}...</span>`;
+    }
 
-    // 2. Draw Button Visibility
-    document.getElementById("drawBtn").style.display = (isTurn && g.tiles.length > 0) ? "block" : "none";
-
-    // 3. Render Board
+    // 2. Render Board
     let bDiv = document.getElementById("boardScroll");
     bDiv.innerHTML = "";
     g.board.forEach(t => {
       let isDouble = (t.a === t.b);
-      let cls = isDouble ? "tile tile-v" : "tile tile-h";
       bDiv.innerHTML += `
-        <div class="${cls}">
-           ${getPips(t.a)}
-           <div class="${isDouble?'line-v':'line-h'}"></div>
-           ${getPips(t.b)}
+        <div class="tile ${isDouble?'tile-v':'tile-h'}">
+           ${getPips(t.a)}<div class="${isDouble?'line-v':'line-h'}"></div>${getPips(t.b)}
         </div>`;
     });
 
-    // 4. My Hand
+    // 3. Render Hand with SMART LIGHTING
     let hDiv = document.getElementById("myHand");
     hDiv.innerHTML = "";
     if(g.players[myId]){
       g.players[myId].tiles.forEach((t, i) => {
+        // Check if playable
+        let isPlayable = false;
+        if(isTurn) {
+            if(g.board.length === 0) isPlayable = true;
+            else {
+                let h = g.board[0].a;
+                let tl = g.board[g.board.length-1].b;
+                if(t.a===h || t.b===h || t.a===tl || t.b===tl) isPlayable = true;
+            }
+        }
+        
         hDiv.innerHTML += `
-          <div class="hand-tile" onclick="playTile(${i})" style="cursor:pointer; ${isTurn?'border:2px solid #4ade80':''}">
-             ${getPips(t.a)}
-             <div style="width:100%;height:1px;background:#ccc"></div>
-             ${getPips(t.b)}
+          <div class="hand-tile ${isPlayable ? 'playable' : ''}" onclick="${isPlayable ? `playTile(${i})` : ''}">
+             ${getPips(t.a)}<div style="width:100%;height:1px;background:#ccc"></div>${getPips(t.b)}
           </div>`;
       });
     }
 
-    // 5. Opponents (Avatars)
-    let oppDiv = document.getElementById("opponents");
-    oppDiv.innerHTML = "";
+    // 4. Opponents
+    let oDiv = document.getElementById("opponents");
+    oDiv.innerHTML = "";
     Object.keys(g.players).forEach(pid => {
        if(pid !== myId){
-         let p = g.players[pid];
-         oppDiv.innerHTML += `
+         oDiv.innerHTML += `
            <div class="avatar ${g.turn===pid?'active-player':''}">
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p.name}">
-              <div class="card-count">${p.tiles.length}</div>
+              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${g.players[pid].name}">
+              <div class="card-count">${g.players[pid].tiles.length}</div>
            </div>`;
        }
     });
-
-    // Update Boneyard Count
     window.remainingTiles = g.tiles.length;
 
-    // 6. AUTO ZOOM / FIT BOARD
+    // 5. Auto Zoom
     setTimeout(() => {
-        let boardScroll = document.getElementById("boardScroll");
-        let boardArea = document.getElementById("boardArea");
-        
-        let contentWidth = boardScroll.scrollWidth;
-        let containerWidth = boardArea.clientWidth;
-        
-        if (contentWidth > containerWidth) {
-            let scale = containerWidth / (contentWidth + 50); 
-            scale = Math.max(scale, 0.4); 
-            boardScroll.style.transform = `scale(${scale})`;
-        } else {
-            boardScroll.style.transform = `scale(1)`;
-        }
+        let bs = document.getElementById("boardScroll");
+        let ba = document.getElementById("boardArea");
+        if(bs.scrollWidth > ba.clientWidth) {
+            let s = ba.clientWidth / (bs.scrollWidth + 40);
+            bs.style.transform = `scale(${Math.max(s, 0.5)})`;
+        } else { bs.style.transform = `scale(1)`; }
     }, 100);
+  }
 
-  } // <-- End of render()
+  function canPlayAny(g){
+      if(g.board.length === 0) return true;
+      let h = g.board[0].a;
+      let tl = g.board[g.board.length-1].b;
+      return g.players[myId].tiles.some(t => t.a===h || t.b===h || t.a===tl || t.b===tl);
+  }
 
-  // --- BONEYARD LOGIC ---
+  // --- ACTIONS ---
   window.openBoneyard = () => {
-    let modal = document.getElementById("boneyardModal");
-    let grid = document.getElementById("boneyardGrid");
-    grid.innerHTML = "";
-    
-    let count = window.remainingTiles || 0;
-    if(count === 0) return alert("Boneyard Empty");
-    let visualCount = Math.min(count, 14); 
-    
-    for(let i=0; i<visualCount; i++){
-        let div = document.createElement("div");
-        div.className = "facedown-tile";
-        div.onclick = () => confirmDraw();
-        grid.appendChild(div);
-    }
-    modal.style.display = "flex";
-  };
+      let grid = document.getElementById("boneyardGrid");
+      grid.innerHTML = "";
+      let count = Math.min(window.remainingTiles, 14);
+      if(count===0) return alert("Pass! No tiles.");
+      for(let i=0;i<count;i++){
+          let d=document.createElement("div"); d.className="facedown-tile";
+          d.onclick=()=>confirmDraw(); grid.appendChild(d);
+      }
+      document.getElementById("boneyardModal").style.display="flex";
+  }
+  window.closeBoneyard = () => document.getElementById("boneyardModal").style.display="none";
+  window.confirmDraw = async () => { closeBoneyard(); await drawTiles(1); };
 
-  window.closeBoneyard = () => {
-    document.getElementById("boneyardModal").style.display = "none";
-  };
-
-  window.confirmDraw = async () => {
-    closeBoneyard();
-    await drawTiles(1);
-  };
-
-  // --- PLAY LOGIC ---
   window.playTile = async (idx) => {
     const ref = doc(db,"rooms",roomId);
     const s = await getDoc(ref);
     let g = s.data();
-    if(g.turn !== myId) return;
-
+    
     let t = g.players[myId].tiles[idx];
     let played = false;
 
-    if(g.board.length === 0){
-      g.board.push(t); played = true;
-    } else {
-      let head = g.board[0].a;
-      let tail = g.board[g.board.length-1].b;
-      
-      if(tail === t.a) { g.board.push(t); played=true; }
-      else if(tail === t.b) { g.board.push({a:t.b,b:t.a}); played=true; }
-      else if(head === t.b) { g.board.unshift(t); played=true; }
-      else if(head === t.a) { g.board.unshift({a:t.b,b:t.a}); played=true; }
+    if(g.board.length === 0){ g.board.push(t); played = true; }
+    else {
+      let h = g.board[0].a, tl = g.board[g.board.length-1].b;
+      if(tl === t.a) { g.board.push(t); played=true; }
+      else if(tl === t.b) { g.board.push({a:t.b,b:t.a}); played=true; }
+      else if(h === t.b) { g.board.unshift(t); played=true; }
+      else if(h === t.a) { g.board.unshift({a:t.b,b:t.a}); played=true; }
     }
 
-    if(!played) return alert("Tile doesn't match!");
+    if(!played) return; // Silent fail if logic mismatch
 
     g.players[myId].tiles.splice(idx,1);
-    
-    if(g.players[myId].tiles.length === 0) alert("🎉 YOU WON!");
 
-    let ids = Object.keys(g.players).sort();
-    let next = ids[(ids.indexOf(myId)+1)%ids.length];
-    
-    await updateDoc(ref, { board: g.board, players: g.players, turn: next });
+    // WIN CONDITION
+    if(g.players[myId].tiles.length === 0) {
+        await updateDoc(ref, { board: g.board, players: g.players, status: "finished", winner: myId });
+    } else {
+        let ids = Object.keys(g.players).sort();
+        let next = ids[(ids.indexOf(myId)+1)%ids.length];
+        await updateDoc(ref, { board: g.board, players: g.players, turn: next });
+    }
   };
 </script>
 </body>
