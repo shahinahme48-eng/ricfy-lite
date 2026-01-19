@@ -2,25 +2,41 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Domino – 2 Player</title>
+  <title>Online Domino 4 Player</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#22c55e">
 </head>
 <body>
 
-  <h1>🎴 Domino – 2 Player</h1>
-  <div id="status"></div>
+<header>
+  <h1>🎴 Online Domino</h1>
+  <div id="status">Not connected</div>
+</header>
 
-  <div id="board"></div>
+<div class="controls">
+  <input id="playerName" placeholder="Your Name">
+  <button onclick="createRoom()">Create Room</button>
+  <input id="roomCode" placeholder="Room Code">
+  <button onclick="joinRoom()">Join Room</button>
+</div>
 
-  <button id="drawBtn" onclick="drawTile()">🎲 Draw Tile</button>
+<div id="board"></div>
 
-  <h2>Player 1</h2>
+<div class="players">
   <div id="p1" class="hand"></div>
-
-  <h2>Player 2</h2>
   <div id="p2" class="hand"></div>
+  <div id="p3" class="hand"></div>
+  <div id="p4" class="hand"></div>
+</div>
 
-  <script src="script.js"></script>
+<input id="chatInput" placeholder="Type message">
+<button onclick="sendChat()">Send</button>
+<div id="chatBox"></div>
+
+<button id="drawBtn" onclick="drawTile()">🎲 Draw</button>
+
+<script type="module" src="script.js"></script>
 </body>
 </html>
