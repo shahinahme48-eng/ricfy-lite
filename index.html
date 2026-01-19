@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <title>Online Domino 4 Player</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
+
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#22c55e">
 </head>
@@ -12,30 +16,45 @@
 
 <header>
   <h1>🎴 Online Domino</h1>
-  <div id="status">Not connected</div>
+  <div id="status">Not Connected</div>
 </header>
 
 <div class="controls">
   <input id="playerName" placeholder="Your Name">
   <button onclick="createRoom()">Create Room</button>
+
   <input id="roomCode" placeholder="Room Code">
   <button onclick="joinRoom()">Join Room</button>
 </div>
 
+<h3>Board</h3>
 <div id="board"></div>
 
 <div class="players">
-  <div id="p1" class="hand"></div>
-  <div id="p2" class="hand"></div>
-  <div id="p3" class="hand"></div>
-  <div id="p4" class="hand"></div>
+  <div>
+    <h4>Player 1</h4>
+    <div id="p1" class="hand"></div>
+  </div>
+  <div>
+    <h4>Player 2</h4>
+    <div id="p2" class="hand"></div>
+  </div>
+  <div>
+    <h4>Player 3</h4>
+    <div id="p3" class="hand"></div>
+  </div>
+  <div>
+    <h4>Player 4</h4>
+    <div id="p4" class="hand"></div>
+  </div>
 </div>
 
+<button id="drawBtn" onclick="drawTile()">🎲 Draw Tile</button>
+
+<h3>Chat</h3>
+<div id="chatBox"></div>
 <input id="chatInput" placeholder="Type message">
 <button onclick="sendChat()">Send</button>
-<div id="chatBox"></div>
-
-<button id="drawBtn" onclick="drawTile()">🎲 Draw</button>
 
 <script type="module" src="script.js"></script>
 </body>
