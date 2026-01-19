@@ -2,120 +2,250 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Domino Pro Multiplayer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Domino Legend Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    /* CSS STYLE */
-    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-    body { margin: 0; background: #0f172a; color: white; text-align: center; }
-    
-    .container { max-width: 600px; margin: 0 auto; padding: 10px; }
-    
-    /* Login & Lobby */
-    .screen { display: none; padding: 20px; background: #1e293b; border-radius: 10px; margin-top: 20px; }
-    .active { display: block; }
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
 
-    input { padding: 10px; margin: 5px; width: 80%; border-radius: 5px; border: none; }
-    button { padding: 10px 20px; margin: 10px; cursor: pointer; background: #3b82f6; color: white; border: none; border-radius: 5px; font-weight: bold; font-size: 16px; }
-    button:disabled { background: #64748b; cursor: not-allowed; }
-    .btn-green { background: #22c55e; }
-    .btn-red { background: #ef4444; }
-
-    /* Game Board */
-    #gameArea { display: none; }
+    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; user-select: none; }
     
-    #boardContainer { 
-      overflow-x: auto; background: #052e16; padding: 20px; 
-      margin: 10px 0; border-radius: 10px; border: 4px solid #553e28; min-height: 120px; 
-      display: flex; align-items: center; white-space: nowrap;
+    body { 
+      margin: 0; 
+      background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); 
+      color: white; 
+      height: 100vh; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+
+    /* --- COIN & SUPPORT BADGES --- */
+    .top-bar-overlay {
+      position: absolute; top: 10px; left: 10px; right: 10px;
+      display: flex; justify-content: space-between; z-index: 100;
+      pointer-events: none; /* Let clicks pass through except buttons */
+    }
+
+    .coin-badge {
+      background: linear-gradient(to right, #f59e0b, #d97706);
+      padding: 5px 15px; border-radius: 20px;
+      font-weight: bold; font-size: 14px;
+      box-shadow: 0 4px 10px rgba(245, 158, 11, 0.4);
+      border: 2px solid #fcd34d; pointer-events: auto;
+      display: flex; align-items: center; gap: 5px;
+    }
+
+    .wa-btn {
+      background: #25D366; color: white;
+      padding: 5px 15px; border-radius: 20px;
+      font-weight: bold; font-size: 14px;
+      border: 2px solid #128C7E; cursor: pointer; pointer-events: auto;
+      text-decoration: none; display: flex; align-items: center; gap: 5px;
+      box-shadow: 0 4px 10px rgba(37, 211, 102, 0.4);
+    }
+
+    /* --- SCREENS --- */
+    .screen { display: none; width: 100%; height: 100%; flex-direction: column; justify-content: center; align-items: center; }
+    .active { display: flex; }
+
+    .panel {
+      background: rgba(30, 41, 59, 0.95);
+      padding: 25px; border-radius: 16px;
+      border: 1px solid #475569;
+      box-shadow: 0 0 50px rgba(0,0,0,0.8);
+      width: 90%; max-width: 400px;
+      text-align: center; position: relative;
+    }
+
+    /* --- FORM ELEMENTS --- */
+    input { 
+      width: 100%; padding: 12px; margin: 8px 0; 
+      background: #0f172a; border: 1px solid #334155; 
+      color: white; border-radius: 8px; text-align: center; font-size: 16px;
+    }
+
+    .main-btn {
+      width: 100%; padding: 12px; margin-top: 10px; cursor: pointer;
+      background: linear-gradient(to bottom, #3b82f6, #1d4ed8);
+      color: white; border: none; border-radius: 8px;
+      font-size: 16px; font-weight: 800; text-transform: uppercase;
+      box-shadow: 0 4px 0 #1e3a8a; transition: transform 0.1s;
+    }
+    .main-btn:active { transform: translateY(3px); box-shadow: none; }
+    
+    .btn-green { background: linear-gradient(to bottom, #22c55e, #15803d); box-shadow: 0 4px 0 #14532d; }
+    .btn-bonus { background: linear-gradient(to bottom, #8b5cf6, #6d28d9); box-shadow: 0 4px 0 #5b21b6; font-size: 12px; margin-bottom: 10px;}
+
+    /* SELECTORS */
+    .selector-group { display: flex; gap: 8px; justify-content: center; margin: 8px 0; }
+    .select-btn {
+      flex: 1; padding: 8px; cursor: pointer;
+      background: #1e293b; border: 1px solid #475569;
+      border-radius: 6px; color: #94a3b8; font-size: 12px; font-weight: bold;
+    }
+    .select-btn.selected {
+      background: #0f172a; border-color: #3b82f6; color: #3b82f6;
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+    }
+
+    /* --- LOBBY LIST --- */
+    .player-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px; border-bottom: 1px solid #334155;
+    }
+    .gift-btn {
+      background: #ec4899; color: white; border: none; border-radius: 15px;
+      padding: 3px 10px; font-size: 10px; cursor: pointer; margin-left: 5px;
+    }
+
+    /* --- GAME TABLE --- */
+    #gameArea { display: none; width: 100%; height: 100%; position: relative; background: #0f172a; }
+    
+    #pokerTable {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -60%);
+      width: 95%; height: 50%;
+      background: radial-gradient(circle, #15803d 0%, #064e3b 100%);
+      border: 10px solid #78350f; border-radius: 100px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+      display: flex; justify-content: center; align-items: center;
     }
     
+    /* TILES */
+    #boardScroll { width: 90%; height: 80%; display: flex; align-items: center; justify-content: center; overflow-x: auto; }
     .tile { 
-      background: #f8fafc; color: black; width: 38px; height: 68px; 
+      background: #fff; color: #000; 
+      width: 34px; height: 60px; 
       display: inline-flex; flex-direction: column; justify-content: center; align-items: center; 
-      border-radius: 4px; font-weight: bold; font-size: 18px; margin: 2px;
-      border: 1px solid #94a3b8; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); vertical-align: middle;
+      border-radius: 4px; margin: 2px;
+      box-shadow: 2px 2px 0 #9ca3af;
+      font-size: 18px; font-weight: bold; flex-shrink: 0;
     }
-    .tile div { line-height: 0.8; }
-    .tile:hover { transform: translateY(-3px); }
+    .tile div { line-height: 0.8; pointer-events: none; }
 
-    .player-box { 
-      border: 1px dashed #475569; padding: 5px; margin: 5px; border-radius: 5px; 
-      background: #334155; min-height: 60px;
+    /* AVATARS */
+    .opponents-row { position: absolute; top: 60px; width: 100%; display: flex; justify-content: space-around; }
+    .avatar-box { display: flex; flex-direction: column; align-items: center; width: 70px; position: relative; }
+    .avatar-img { 
+      width: 45px; height: 45px; border-radius: 50%; background: #334155; border: 2px solid #fff;
+      display: flex; justify-content: center; align-items: center; font-size: 20px;
     }
-    .my-turn { border: 2px solid #22c55e; box-shadow: 0 0 10px #22c55e; }
+    .active-turn .avatar-img { border-color: #facc15; box-shadow: 0 0 15px #facc15; animation: pulse 1s infinite; }
 
-    #roomCodeDisplay { font-size: 24px; color: #facc15; letter-spacing: 2px; font-weight: bold; }
-    #playerList { text-align: left; margin: 10px; color: #cbd5e1; }
+    /* MY HAND */
+    .my-area { 
+      position: absolute; bottom: 0; width: 100%; 
+      background: rgba(15, 23, 42, 0.9); padding: 10px; 
+      border-top: 2px solid #facc15;
+    }
+    .my-hand { display: flex; overflow-x: auto; justify-content: center; gap: 5px; padding-bottom: 5px; }
+
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h2>🎴 Domino Master</h2>
-  <div id="status" style="color: yellow; font-size: 14px;">Connecting...</div>
-
-  <!-- SCREEN 1: MENU -->
-  <div id="menuScreen" class="screen active">
-    <input id="playerName" placeholder="Enter Your Name (e.g. Shahin)">
-    <br>
-    <button onclick="createRoom()">Create Room</button>
-    <br>
-    <p>-- OR --</p>
-    <input id="roomCodeInput" placeholder="Enter Room Code">
-    <br>
-    <button onclick="joinRoom()">Join Room</button>
+<!-- TOP BAR (Coins & WhatsApp) -->
+<div class="top-bar-overlay">
+  <!-- WhatsApp Button -->
+  <a id="waLink" href="#" target="_blank" class="wa-btn">
+    <i class="fab fa-whatsapp"></i> Help
+  </a>
+  
+  <!-- Coin Badge -->
+  <div class="coin-badge">
+    <i class="fas fa-coins"></i> <span id="userCoins">Loading..</span>
   </div>
-
-  <!-- SCREEN 2: LOBBY -->
-  <div id="lobbyScreen" class="screen">
-    <h3>Room Code:</h3>
-    <div id="roomCodeDisplay">...</div>
-    <p>Share this code with friends!</p>
-    
-    <div id="playerList">
-      Waiting for players...
-    </div>
-
-    <button id="btnStartGame" class="btn-green" style="display:none;" onclick="startGame()">Start Game</button>
-    <p id="waitingMsg">Waiting for Host to start...</p>
-  </div>
-
-  <!-- SCREEN 3: GAME BOARD -->
-  <div id="gameArea">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <span id="turnIndicator">Turn: ...</span>
-      <button class="btn-red" onclick="location.reload()">Exit</button>
-    </div>
-
-    <div id="boardContainer"></div>
-
-    <!-- PLAYERS AREA -->
-    <div id="playersContainer"></div>
-
-    <button id="drawBtn" onclick="drawTile()">🎲 Draw Tile from Boneyard</button>
-    
-    <!-- CHAT -->
-    <div style="margin-top:20px; border-top:1px solid #475569; padding-top:10px;">
-        <div id="chatBox" style="height:100px; overflow-y:auto; text-align:left; font-size:12px;"></div>
-        <div style="display:flex;">
-            <input id="chatInput" placeholder="Message..." style="flex:1;">
-            <button onclick="sendChat()" style="margin:5px; padding:5px 10px;">Send</button>
-        </div>
-    </div>
-  </div>
-
 </div>
 
-<!-- FIREBASE LOGIC -->
+<!-- === SCREEN 1: MENU === -->
+<div id="menuScreen" class="screen active">
+  <div class="panel">
+    <h2 style="margin:0; color:#facc15; text-transform: uppercase;">Domino Pro</h2>
+    <p style="color:#94a3b8; font-size:11px; margin-bottom: 15px;">Win Coins & Challenge Friends</p>
+    
+    <input id="playerName" placeholder="Enter Your Nickname">
+    
+    <div style="text-align:left; margin-top:10px;">
+        <label style="font-size:11px; color:#cbd5e1;">👥 Players:</label>
+        <div class="selector-group">
+            <div class="select-btn selected" onclick="selectPlayers(2, this)">2 Players</div>
+            <div class="select-btn" onclick="selectPlayers(4, this)">4 Players</div>
+        </div>
+
+        <label style="font-size:11px; color:#cbd5e1;">💰 Bet Amount:</label>
+        <div class="selector-group">
+            <div class="select-btn selected" onclick="selectBet(100, this)">100</div>
+            <div class="select-btn" onclick="selectBet(500, this)">500</div>
+            <div class="select-btn" onclick="selectBet(2000, this)">2K</div>
+        </div>
+    </div>
+
+    <button onclick="createRoom()" class="main-btn btn-green">CREATE ROOM</button>
+    <div style="font-size:12px; margin:8px; color:#64748b;">— OR —</div>
+    <input id="roomCodeInput" placeholder="Room Code (e.g. A1B2C)">
+    <button onclick="joinRoom()" class="main-btn">JOIN ROOM</button>
+    
+    <!-- Daily Bonus -->
+    <div style="margin-top:20px;">
+      <button onclick="claimBonus()" class="main-btn btn-bonus">🎁 Daily Free Coins</button>
+    </div>
+  </div>
+</div>
+
+<!-- === SCREEN 2: LOBBY === -->
+<div id="lobbyScreen" class="screen">
+  <div class="panel">
+    <h4 style="color:#94a3b8; margin:0">Room Code</h4>
+    <h1 id="lobbyCode" style="font-size:36px; color:#facc15; letter-spacing:3px; margin:5px 0;">...</h1>
+    
+    <div id="lobbyInfo" style="font-size:12px; color:#4ade80;">...</div>
+
+    <div id="playerList" style="background:#1e293b; padding:10px; border-radius:8px; margin:15px 0; text-align:left; max-height:150px; overflow-y:auto;">
+      Waiting...
+    </div>
+
+    <p id="waitMsg" style="font-size:11px; color:#94a3b8;">Game starts automatically when full.</p>
+    <button onclick="location.reload()" style="background:#ef4444; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Leave</button>
+  </div>
+</div>
+
+<!-- === SCREEN 3: GAMEPLAY === -->
+<div id="gameArea">
+  <div style="position:absolute; top:50px; left:10px; font-size:11px; color:rgba(255,255,255,0.4);">
+      Pot: <span id="gamePot" style="color:#facc15; font-weight:bold;">0</span> 💰
+  </div>
+  
+  <button onclick="location.reload()" style="position:absolute; top:50px; right:10px; padding:4px 8px; background:#ef4444; color:white; border:none; border-radius:4px; cursor:pointer; font-size:10px;">Exit</button>
+
+  <div class="opponents-row" id="opponentsDiv"></div>
+
+  <div id="pokerTable">
+    <div id="boardScroll"></div>
+    <div id="centerText" style="color:rgba(255,255,255,0.15); font-size:24px; font-weight:bold;">DOMINO</div>
+  </div>
+
+  <div class="my-area">
+    <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+        <div id="turnStatus" style="font-size:12px; font-weight:bold; color:#facc15;">Connecting...</div>
+        <button onclick="drawTile()" style="background:#f59e0b; border:none; padding:4px 12px; border-radius:15px; cursor:pointer; font-weight:bold; font-size:12px; color:black;">🎲 Draw</button>
+    </div>
+    <div class="my-hand" id="myHandDiv"></div>
+  </div>
+</div>
+
+<!-- FIREBASE & LOGIC -->
 <script type="module">
+  // ============================================
+  // 🟢 ADMIN SETTINGS (CHANGE YOUR NUMBER HERE)
+  const ADMIN_WHATSAPP = "971566932862"; 
+ ============================================
+
+  document.getElementById("waLink").href = `https://wa.me/${ADMIN_WHATSAPP}?text=Hello Admin, I need help with Domino Game coins.`;
+
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
   import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-  import {
-    getFirestore, doc, setDoc, updateDoc, getDoc,
-    onSnapshot, collection, addDoc, serverTimestamp, query, orderBy
-  } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, updateDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAXXWgGt8WbMzmgn2ukdB4qtP5xwr2jz5E",
@@ -130,52 +260,65 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  let roomId = null;
-  let myPlayerId = null;
-  let myName = "";
-  let isHost = false;
+  let myName = localStorage.getItem("dominoName") || "";
+  if(myName) document.getElementById("playerName").value = myName;
+  
+  let myPlayerId = "";
+  let roomId = "";
+  let selectedPlayers = 2;
+  let selectedBet = 100;
+  let myCoins = parseInt(localStorage.getItem("dominoCoins")) || 2000;
 
-  // 1. Auto Login
-  signInAnonymously(auth).then(() => {
-    document.getElementById("status").innerText = "Online - Ready";
-  }).catch(e => alert("Login Error: "+e.message));
+  document.getElementById("userCoins").innerText = myCoins;
 
-  // --- FUNCTIONS ---
+  signInAnonymously(auth).catch(e=>console.error(e));
 
-  // Generate Tiles as OBJECTS {a:1, b:2} not Arrays [1,2]
-  function generateTiles(){
-    let t=[];
-    for(let i=0;i<=6;i++){
-      for(let j=i;j<=6;j++){
-        t.push({a:i, b:j}); // FIXED: Using Objects
-      }
-    }
-    return t.sort(()=>Math.random()-0.5);
+  // --- UI HELPERS ---
+  window.selectPlayers = (n,b) => { selectedPlayers=n; document.querySelectorAll('.select-btn').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); }
+  window.selectBet = (n,b) => { selectedBet=n; document.querySelectorAll('.bet-btn').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); }
+
+  function updateCoins(n){
+    myCoins = n;
+    localStorage.setItem("dominoCoins", myCoins);
+    document.getElementById("userCoins").innerText = myCoins;
   }
 
-  // CREATE ROOM
+  // --- DAILY BONUS ---
+  window.claimBonus = function(){
+    let lastClaim = localStorage.getItem("lastBonus");
+    let today = new Date().toDateString();
+    if(lastClaim === today){
+      alert("❌ You already claimed today's bonus! Come back tomorrow.");
+    } else {
+      updateCoins(myCoins + 500);
+      localStorage.setItem("lastBonus", today);
+      alert("🎁 Success! Received 500 Free Coins.");
+    }
+  }
+
+  // --- CREATE ROOM ---
   window.createRoom = async function(){
-    myName = document.getElementById("playerName").value || "Host";
+    myName = document.getElementById("playerName").value || "Player";
+    localStorage.setItem("dominoName", myName);
+
+    if(myCoins < selectedBet) return alert("❌ Not enough coins! Contact Admin on WhatsApp.");
+
     roomId = Math.random().toString(36).substring(2,7).toUpperCase();
     myPlayerId = "p1";
-    isHost = true;
+    updateCoins(myCoins - selectedBet);
 
     await setDoc(doc(db,"rooms",roomId), {
       status: "lobby",
-      players: {
-        p1: { name: myName, tiles: [] }
-      },
-      board: [],
-      tiles: generateTiles(), // Full set in boneyard initially
-      turn: "p1"
+      config: { max: selectedPlayers, bet: selectedBet },
+      players: { p1: { name: myName, tiles: [], gift: 0 } }, // gift field added
+      board: [], tiles: generateTiles(), turn: "p1", winner: null
     });
-
     enterLobby();
   }
 
-  // JOIN ROOM
+  // --- JOIN ROOM ---
   window.joinRoom = async function(){
-    myName = document.getElementById("playerName").value || "Guest";
+    myName = document.getElementById("playerName").value || "Player";
     roomId = document.getElementById("roomCodeInput").value.toUpperCase().trim();
     if(!roomId) return alert("Enter Code");
 
@@ -184,209 +327,181 @@
     if(!snap.exists()) return alert("Room not found");
     
     let data = snap.data();
-    if(data.status !== "lobby") return alert("Game already started!");
+    if(data.status !== "lobby") return alert("Game already started");
+    if(Object.keys(data.players).length >= data.config.max) return alert("Room Full");
+    if(myCoins < data.config.bet) return alert("❌ Need "+data.config.bet+" coins! Ask friend for Gift.");
+
+    updateCoins(myCoins - data.config.bet);
+    let pid = "p" + (Object.keys(data.players).length + 1);
+    myPlayerId = pid;
     
-    let count = Object.keys(data.players).length;
-    if(count >= 4) return alert("Room Full");
+    data.players[pid] = { name: myName, tiles: [], gift: 0 };
+    
+    // Auto Start
+    if(Object.keys(data.players).length === data.config.max){
+      data.status = "playing";
+      Object.keys(data.players).forEach(p => data.players[p].tiles = data.tiles.splice(0,7));
+    }
 
-    myPlayerId = "p" + (count + 1);
-    data.players[myPlayerId] = { name: myName, tiles: [] };
-
-    await updateDoc(ref, { players: data.players });
+    await updateDoc(ref, { players: data.players, status: data.status, tiles: data.tiles });
     enterLobby();
   }
 
   function enterLobby(){
     document.getElementById("menuScreen").classList.remove("active");
     document.getElementById("lobbyScreen").classList.add("active");
-    document.getElementById("roomCodeDisplay").innerText = roomId;
-    
-    // Listen for updates
-    onSnapshot(doc(db,"rooms",roomId), (snap) => {
+    document.getElementById("lobbyCode").innerText = roomId;
+
+    onSnapshot(doc(db,"rooms",roomId), (snap)=>{
       let data = snap.data();
       if(!data) return;
 
-      // Update Player List in Lobby
-      let listHtml = "<b>Players Joined:</b><br>";
+      // Check for Gifts received
+      if(data.players[myPlayerId] && data.players[myPlayerId].gift > 0){
+        let amount = data.players[myPlayerId].gift;
+        updateCoins(myCoins + amount);
+        alert(`🎁 You received ${amount} coins gift!`);
+        // Reset gift in DB
+        data.players[myPlayerId].gift = 0;
+        updateDoc(doc(db,"rooms",roomId), { players: data.players });
+      }
+
+      document.getElementById("lobbyInfo").innerHTML = `Entry: ${data.config.bet} 💰 | Need: ${data.config.max} Players`;
+      
+      let html = "";
       Object.keys(data.players).forEach(pid => {
-        listHtml += `👤 ${data.players[pid].name} <br>`;
+        let p = data.players[pid];
+        let isMe = (pid === myPlayerId);
+        
+        html += `<div class="player-row">
+           <div style="color:white; font-size:12px;">👤 ${p.name} ${isMe?'(You)':''}</div>
+           ${!isMe ? `<button class="gift-btn" onclick="sendGift('${pid}')">🎁 Gift 500</button>` : ''}
+        </div>`;
       });
-      document.getElementById("playerList").innerHTML = listHtml;
+      document.getElementById("playerList").innerHTML = html;
 
-      // Show Start Button only to Host (p1)
-      if(myPlayerId === "p1" && data.status === "lobby"){
-        document.getElementById("btnStartGame").style.display = "inline-block";
-        document.getElementById("waitingMsg").style.display = "none";
-      }
-
-      // If Game Started, Switch Screen
-      if(data.status === "playing"){
-        startGameUI(data);
-      }
+      if(data.status === "playing") startGame(data);
     });
-
-    listenChat();
   }
 
-  // START GAME (Host Only)
-  window.startGame = async function(){
+  // --- GIFT LOGIC ---
+  window.sendGift = async function(targetPid){
+    if(myCoins < 500) return alert("❌ Not enough coins to gift!");
+    if(!confirm("Send 500 coins to this player?")) return;
+
     const ref = doc(db,"rooms",roomId);
     const snap = await getDoc(ref);
     let data = snap.data();
 
-    // Distribute 7 tiles to each connected player
-    Object.keys(data.players).forEach(pid => {
-      data.players[pid].tiles = data.tiles.splice(0, 7);
-    });
+    // Deduct from me
+    updateCoins(myCoins - 500);
+    
+    // Add pending gift to target
+    if(!data.players[targetPid].gift) data.players[targetPid].gift = 0;
+    data.players[targetPid].gift += 500;
 
-    await updateDoc(ref, {
-      players: data.players,
-      tiles: data.tiles,
-      status: "playing"
-    });
+    await updateDoc(ref, { players: data.players });
+    alert("✅ Gift Sent!");
   }
 
-  function startGameUI(data){
+  function startGame(data){
     document.getElementById("lobbyScreen").classList.remove("active");
     document.getElementById("gameArea").style.display = "block";
+    document.getElementById("gamePot").innerText = data.config.bet * data.config.max;
     renderBoard(data);
   }
 
-  // RENDER GAME
   function renderBoard(g){
-    // Turn Status
-    let turnName = g.players[g.turn]?.name || "Unknown";
-    document.getElementById("turnIndicator").innerHTML = 
-      `Turn: <b style="color:${g.turn===myPlayerId?'#4ade80':'white'}">${turnName}</b>`;
+    if(g.status === "finished"){
+      if(g.winner === myPlayerId){
+        alert("🏆 YOU WON!");
+        updateCoins(myCoins + (g.config.bet * g.config.max));
+      } else {
+        alert("😢 You Lost!");
+      }
+      location.reload();
+      return;
+    }
 
-    // Board Render
-    const boardEl = document.getElementById("boardContainer");
-    boardEl.innerHTML = "";
-    g.board.forEach(t => {
-      // t is {a:1, b:2}
-      boardEl.innerHTML += `
-        <div class="tile" style="background:white; cursor:default;">
-           <div>${t.a}</div><div style="height:1px;width:25px;background:black;margin:2px;"></div><div>${t.b}</div>
-        </div>`;
-    });
+    const bEl = document.getElementById("boardScroll");
+    bEl.innerHTML = "";
+    g.board.forEach(t => bEl.innerHTML += `<div class="tile"><div>${t.a}</div><div style="height:1px;width:100%;background:#ccc"></div><div>${t.b}</div></div>`);
+    if(g.board.length) document.getElementById("centerText").style.display="none";
 
-    // Players Render
-    const pContainer = document.getElementById("playersContainer");
-    pContainer.innerHTML = "";
+    const oppEl = document.getElementById("opponentsDiv");
+    const myEl = document.getElementById("myHandDiv");
+    oppEl.innerHTML=""; myEl.innerHTML="";
 
-    // Show ME first, then others
-    let playerKeys = Object.keys(g.players).sort(); 
-    
-    playerKeys.forEach(pid => {
+    Object.keys(g.players).sort().forEach(pid => {
       let p = g.players[pid];
-      let isMe = (pid === myPlayerId);
-      let isTurn = (g.turn === pid);
-      
-      let html = `
-        <div class="player-box ${isTurn ? 'my-turn' : ''}">
-           <div style="font-size:12px; margin-bottom:5px;">${p.name} ${isMe?'(You)':''} - Tiles: ${p.tiles.length}</div>
-           <div>`;
-           
-      p.tiles.forEach((t, idx) => {
-        if(isMe){
-          // My Tiles (Clickable)
-          html += `<div class="tile" onclick="playTile(${idx})" style="cursor:pointer; background:${isTurn?'white':'#cbd5e1'}">
-             <div>${t.a}</div><div style="height:1px;width:25px;background:black;margin:2px;"></div><div>${t.b}</div>
-          </div>`;
-        } else {
-          // Enemy Tiles (Hidden)
-          html += `<div class="tile" style="background:#475569; color:#475569; width:25px; height:45px; border:none;">?</div>`;
-        }
-      });
-
-      html += `</div></div>`;
-      pContainer.innerHTML += html;
+      if(pid === myPlayerId){
+        document.getElementById("turnStatus").innerText = (g.turn===pid) ? "🟢 YOUR TURN" : `🔴 Wait for ${g.players[g.turn].name}`;
+        p.tiles.forEach((t,i) => {
+           myEl.innerHTML += `<div class="tile" onclick="playTile(${i})" style="${g.turn===pid?'border:2px solid #22c55e;transform:scale(1.1);cursor:pointer':''}"><div>${t.a}</div><div></div><div>${t.b}</div></div>`;
+        });
+      } else {
+        oppEl.innerHTML += `<div class="avatar-box ${g.turn===pid?'active-turn':''}"><div class="avatar-img"><i class="fas fa-user"></i></div><span style="background:red;border-radius:50%;width:18px;height:18px;font-size:10px;display:flex;justify-content:center;align-items:center;position:absolute;top:0;right:5px;">${p.tiles.length}</span><div style="font-size:9px;margin-top:2px;">${p.name}</div></div>`;
+      }
     });
   }
 
-  // PLAY TILE LOGIC
+  // --- GAME ACTIONS ---
+  function generateTiles(){ let t=[]; for(let i=0;i<=6;i++) for(let j=i;j<=6;j++) t.push({a:i,b:j}); return t.sort(()=>Math.random()-0.5); }
+
   window.playTile = async function(idx){
     const ref = doc(db,"rooms",roomId);
     const snap = await getDoc(ref);
     const g = snap.data();
+    
+    if(g.turn !== myPlayerId) return;
 
-    if(g.turn !== myPlayerId) return alert("Not your turn!");
-
-    let tile = g.players[myPlayerId].tiles[idx]; // {a:1, b:2}
+    let t = g.players[myPlayerId].tiles[idx];
     let played = false;
 
-    if(g.board.length === 0){
-      g.board.push(tile);
-      played = true;
+    // Board Logic
+    if(g.board.length === 0) { 
+        g.board.push(t); 
+        played = true; 
     } else {
-      let left = g.board[0].a;
-      let right = g.board[g.board.length-1].b;
+      let l = g.board[0].a;
+      let r = g.board[g.board.length-1].b;
       
-      // Try Right
-      if(right === tile.a) { g.board.push({a: tile.a, b: tile.b}); played=true; }
-      else if(right === tile.b) { g.board.push({a: tile.b, b: tile.a}); played=true; } // Flip
-      // Try Left
-      else if(left === tile.b) { g.board.unshift({a: tile.a, b: tile.b}); played=true; }
-      else if(left === tile.a) { g.board.unshift({a: tile.b, b: tile.a}); played=true; } // Flip
+      // Match Logic
+      if(r === t.a){ g.board.push(t); played=true; }
+      else if(r === t.b){ g.board.push({a:t.b, b:t.a}); played=true; } // Flip
+      else if(l === t.b){ g.board.unshift(t); played=true; }
+      else if(l === t.a){ g.board.unshift({a:t.b, b:t.a}); played=true; } // Flip
     }
 
-    if(!played) return alert("Tile does not match!");
+    if(!played) return alert("❌ Invalid Move! Tile doesn't match.");
 
-    // Remove tile and Switch turn
-    g.players[myPlayerId].tiles.splice(idx, 1);
-    
-    // Check Win
+    // Remove tile from hand
+    g.players[myPlayerId].tiles.splice(idx,1);
+
+    // WIN CHECK
     if(g.players[myPlayerId].tiles.length === 0){
-        alert("🎉 YOU WON! 🎉");
-        await updateDoc(ref, { status: "finished", winner: myName });
-        return;
+        await updateDoc(ref, { status:"finished", winner:myPlayerId });
+    } else {
+        // NEXT TURN logic
+        let ids = Object.keys(g.players).sort();
+        let next = ids[(ids.indexOf(myPlayerId)+1) % ids.length];
+        await updateDoc(ref, { board:g.board, players:g.players, turn:next });
     }
-
-    // Next Player Logic
-    let pIds = Object.keys(g.players).sort();
-    let currIdx = pIds.indexOf(myPlayerId);
-    let nextIdx = (currIdx + 1) % pIds.length;
-    let nextPid = pIds[nextIdx];
-
-    await updateDoc(ref, {
-      board: g.board,
-      players: g.players,
-      turn: nextPid
-    });
   }
 
-  // DRAW TILE
+  // DRAW TILE FUNCTION
   window.drawTile = async function(){
     const ref = doc(db,"rooms",roomId);
     const snap = await getDoc(ref);
     const g = snap.data();
-
-    if(g.turn !== myPlayerId) return alert("Wait for turn!");
-    if(g.tiles.length === 0) return alert("No tiles left!");
-
+    
+    if(g.turn !== myPlayerId) return;
+    if(!g.tiles.length) return alert("⚠️ Boneyard is Empty!");
+    
     g.players[myPlayerId].tiles.push(g.tiles.pop());
-    await updateDoc(ref, { players: g.players, tiles: g.tiles });
+    await updateDoc(ref,{players:g.players, tiles:g.tiles});
   }
 
-  // CHAT
-  function listenChat(){
-    const q = query(collection(db,"rooms",roomId,"chat"), orderBy("timestamp"));
-    onSnapshot(q, (snap) => {
-      document.getElementById("chatBox").innerHTML = snap.docs.map(d=>
-        `<div><b>${d.data().sender}:</b> ${d.data().message}</div>`
-      ).join("");
-    });
-  }
-
-  window.sendChat = async function(){
-    let msg = document.getElementById("chatInput").value;
-    if(!msg) return;
-    await addDoc(collection(db,"rooms",roomId,"chat"), {
-      sender: myName, message: msg, timestamp: serverTimestamp()
-    });
-    document.getElementById("chatInput").value="";
-  }
 </script>
-
 </body>
 </html>
