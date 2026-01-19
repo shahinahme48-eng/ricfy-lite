@@ -2,246 +2,210 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Domino Legend Pro</title>
+  <title>Domino Pro Real</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+    /* --- BASIC --- */
+    body { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; user-select: none; }
 
-    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; user-select: none; }
+    /* --- THE TABLE (Green Felt) --- */
+    #table {
+      width: 100vw; height: 100vh;
+      background: radial-gradient(circle, #2e7d32 0%, #1b5e20 100%);
+      position: relative;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    #table::before {
+      content: ""; position: absolute; top:0; left:0; right:0; bottom:0;
+      border: 15px solid #3e2723; /* Wood Border */
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+      pointer-events: none; z-index: 10;
+    }
+
+    /* --- TOP BAR --- */
+    .top-bar {
+      position: absolute; top: 20px; left: 20px; z-index: 20;
+      display: flex; gap: 10px;
+    }
+    .badge {
+      background: rgba(0,0,0,0.6); color: gold; 
+      padding: 5px 15px; border-radius: 20px; font-weight: bold; border: 1px solid gold;
+    }
+
+    /* --- PLAYER AVATARS (Top) --- */
+    .opponents {
+      display: flex; justify-content: center; gap: 20px; padding-top: 25px; z-index: 15;
+    }
+    .avatar {
+      width: 60px; height: 60px; border-radius: 50%;
+      background: #444; border: 3px solid #ccc;
+      position: relative; display: flex; justify-content: center; align-items: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    .avatar img { width: 100%; height: 100%; border-radius: 50%; }
+    .card-count {
+      position: absolute; bottom: -5px; right: -5px;
+      background: red; color: white; width: 24px; height: 24px;
+      border-radius: 50%; font-size: 12px; font-weight: bold;
+      display: flex; justify-content: center; align-items: center; border: 2px solid white;
+    }
+    .active-player { border-color: gold; box-shadow: 0 0 15px gold; }
+
+    /* --- BOARD AREA --- */
+    #boardArea {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      overflow: auto; position: relative;
+    }
+    #boardScroll {
+      display: flex; align-items: center; padding: 50px; min-width: 100%;
+      justify-content: center;
+    }
+
+    /* --- TILE STYLING (Realistic) --- */
+    .tile {
+      background: #f4f1ea; /* Bone color */
+      border-radius: 4px;
+      box-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+      position: relative;
+      display: flex;cursor: pointer;
+      box-sizing: border-box;
+      border: 1px solid #999;
+    }
     
-    body { 
-      margin: 0; 
-      background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); 
-      color: white; 
-      height: 100vh; overflow: hidden;
+    /* Horizontal (Normal) */
+    .tile-h { width: 70px; height: 35px; flex-direction: row; }
+    /* Vertical (Double) */
+    .tile-v { width: 35px; height: 70px; flex-direction: column; }
+
+    .line-h { width: 1px; height: 100%; background: #bdc3c7; }
+    .line-v { width: 100%; height: 1px; background: #bdc3c7; }
+
+    /* Pips (Dots) */
+    .pips {
+      flex: 1; display: grid; 
+      grid-template-columns: repeat(3, 1fr); 
+      grid-template-rows: repeat(3, 1fr);
+      padding: 3px;
+    }
+    .dot {
+      width: 6px; height: 6px; background: #000; border-radius: 50%;
+      margin: auto; box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8);
+    }
+
+    /* --- MY HAND (Bottom) --- */
+    .my-area {
+      background: rgba(0,0,0,0.5);
+      border-top: 5px solid #3e2723;
+      padding: 10px; display: flex; flex-direction: column; align-items: center;
+      z-index: 20;
+    }
+    .my-hand {
+      display: flex; gap: 8px; overflow-x: auto; padding: 10px; max-width: 100%;
+    }
+    .hand-tile {
+      width: 38px; height: 76px; background: #fff;
       display: flex; flex-direction: column;
+      border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+      transition: transform 0.2s;
     }
+    .hand-tile:hover { transform: translateY(-15px); }
 
-    /* --- COIN & SUPPORT BADGES --- */
-    .top-bar-overlay {
-      position: absolute; top: 10px; left: 10px; right: 10px;
-      display: flex; justify-content: space-between; z-index: 100;
-      pointer-events: none;
+    /* --- BONEYARD MODAL (Like Screenshot) --- */
+    #boneyardModal {
+      display: none;
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8); z-index: 1000;
+      flex-direction: column; justify-content: center; align-items: center;
     }
-
-    .coin-badge {
-      background: linear-gradient(to right, #f59e0b, #d97706);
-      padding: 5px 15px; border-radius: 20px;
-      font-weight: bold; font-size: 14px;
-      box-shadow: 0 4px 10px rgba(245, 158, 11, 0.4);
-      border: 2px solid #fcd34d; pointer-events: auto;
-      display: flex; align-items: center; gap: 5px;
+    .boneyard-grid {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+      max-width: 80%;
     }
-
-    .wa-btn {
-      background: #25D366; color: white;
-      padding: 5px 15px; border-radius: 20px;
-      font-weight: bold; font-size: 14px;
-      border: 2px solid #128C7E; cursor: pointer; pointer-events: auto;
-      text-decoration: none; display: flex; align-items: center; gap: 5px;
-      box-shadow: 0 4px 10px rgba(37, 211, 102, 0.4);
+    .facedown-tile {
+      width: 40px; height: 70px;
+      background: linear-gradient(135deg, #e0c39a 0%, #5d4037 100%);
+      border: 2px solid #fff; border-radius: 4px;
+      cursor: pointer;
     }
+    .facedown-tile:active { transform: scale(0.9); }
 
-    /* --- SCREENS --- */
-    .screen { display: none; width: 100%; height: 100%; flex-direction: column; justify-content: center; align-items: center; }
-    .active { display: flex; }
-
-    .panel {
-      background: rgba(30, 41, 59, 0.95);
-      padding: 25px; border-radius: 16px;
-      border: 1px solid #475569;
-      box-shadow: 0 0 50px rgba(0,0,0,0.8);
-      width: 90%; max-width: 400px;
-      text-align: center; position: relative;
+    /* --- LOGIN SCREEN --- */
+    #login {
+      position: absolute; top:0; left:0; width:100%; height:100%;
+      background: radial-gradient(circle, #2c3e50 0%, #000 100%);
+      z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white;
     }
-
-    /* --- FORM ELEMENTS --- */
-    input { 
-      width: 100%; padding: 12px; margin: 8px 0; 
-      background: #0f172a; border: 1px solid #334155; 
-      color: white; border-radius: 8px; text-align: center; font-size: 16px;
-    }
-
-    .main-btn {
-      width: 100%; padding: 12px; margin-top: 10px; cursor: pointer;
-      background: linear-gradient(to bottom, #3b82f6, #1d4ed8);
-      color: white; border: none; border-radius: 8px;
-      font-size: 16px; font-weight: 800; text-transform: uppercase;
-      box-shadow: 0 4px 0 #1e3a8a; transition: transform 0.1s;
-    }
-    .main-btn:active { transform: translateY(3px); box-shadow: none; }
+    input { padding: 12px; margin: 10px; border-radius: 5px; border: none; text-align: center; font-size: 16px; }
+    .btn { padding: 12px 30px; margin: 5px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; }
+    .btn-gold { background: linear-gradient(to bottom, #ffd700, #ff8c00); color: black; }
     
-    .btn-green { background: linear-gradient(to bottom, #22c55e, #15803d); box-shadow: 0 4px 0 #14532d; }
-    .btn-bonus { background: linear-gradient(to bottom, #8b5cf6, #6d28d9); box-shadow: 0 4px 0 #5b21b6; font-size: 12px; margin-bottom: 10px;}
-
-    /* SELECTORS */
-    .selector-group { display: flex; gap: 8px; justify-content: center; margin: 8px 0; }
-    .select-btn {
-      flex: 1; padding: 8px; cursor: pointer;
-      background: #1e293b; border: 1px solid #475569;
-      border-radius: 6px; color: #94a3b8; font-size: 12px; font-weight: bold;
-    }
-    .select-btn.selected {
-      background: #0f172a; border-color: #3b82f6; color: #3b82f6;
-      box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
-    }
-
-    /* --- LOBBY LIST --- */
-    .player-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 10px; border-bottom: 1px solid #334155;
-    }
-    .gift-btn {
-      background: #ec4899; color: white; border: none; border-radius: 15px;
-      padding: 3px 10px; font-size: 10px; cursor: pointer; margin-left: 5px;
-    }
-
-    /* --- GAME TABLE --- */
-    #gameArea { display: none; width: 100%; height: 100%; position: relative; background: #0f172a; }
-    
-    #pokerTable {
-      position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%, -60%);
-      width: 95%; height: 50%;
-      background: radial-gradient(circle, #15803d 0%, #064e3b 100%);
-      border: 10px solid #78350f; border-radius: 100px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
-      display: flex; justify-content: center; align-items: center;
-    }
-    
-    /* TILES */
-    #boardScroll { width: 90%; height: 80%; display: flex; align-items: center; justify-content: center; overflow-x: auto; }
-    .tile { 
-      background: #fff; color: #000; 
-      width: 34px; height: 60px; 
-      display: inline-flex; flex-direction: column; justify-content: center; align-items: center; 
-      border-radius: 4px; margin: 2px;
-      box-shadow: 2px 2px 0 #9ca3af;
-      font-size: 18px; font-weight: bold; flex-shrink: 0;
-    }
-    .tile div { line-height: 0.8; pointer-events: none; }
-
-    /* AVATARS */
-    .opponents-row { position: absolute; top: 60px; width: 100%; display: flex; justify-content: space-around; }
-    .avatar-box { display: flex; flex-direction: column; align-items: center; width: 70px; position: relative; }
-    .avatar-img { 
-      width: 45px; height: 45px; border-radius: 50%; background: #334155; border: 2px solid #fff;
-      display: flex; justify-content: center; align-items: center; font-size: 20px;
-    }
-    .active-turn .avatar-img { border-color: #facc15; box-shadow: 0 0 15px #facc15; animation: pulse 1s infinite; }
-
-    /* MY HAND */
-    .my-area { 
-      position: absolute; bottom: 0; width: 100%; 
-      background: rgba(15, 23, 42, 0.9); padding: 10px; 
-      border-top: 2px solid #facc15;
-    }
-    .my-hand { display: flex; overflow-x: auto; justify-content: center; gap: 5px; padding-bottom: 5px; }
-
-    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
   </style>
 </head>
 <body>
 
-<!-- TOP BAR (Coins & WhatsApp) -->
-<div class="top-bar-overlay">
-  <!-- WhatsApp Button -->
-  <a id="waLink" href="#" target="_blank" class="wa-btn">
-    <i class="fab fa-whatsapp"></i> Help
-  </a>
+<!-- === LOGIN === -->
+<div id="login">
+  <img src="https://cdn-icons-png.flaticon.com/512/566/566324.png" width="80" style="margin-bottom:20px;">
+  <h1 style="margin:0; text-transform:uppercase; letter-spacing:2px; color:gold;">Domino Pro</h1>
+  <p style="color:#aaa;">Online Multiplayer</p>
   
-  <!-- Coin Badge -->
-  <div class="coin-badge">
-    <i class="fas fa-coins"></i> <span id="userCoins">Loading..</span>
-  </div>
-</div>
-
-<!-- === SCREEN 1: MENU === -->
-<div id="menuScreen" class="screen active">
-  <div class="panel">
-    <h2 style="margin:0; color:#facc15; text-transform: uppercase;">Domino Pro</h2>
-    <p style="color:#94a3b8; font-size:11px; margin-bottom: 15px;">Win Coins & Challenge Friends</p>
-    
-    <input id="playerName" placeholder="Enter Your Nickname">
-    
-    <div style="text-align:left; margin-top:10px;">
-        <label style="font-size:11px; color:#cbd5e1;">👥 Players:</label>
-        <div class="selector-group">
-            <div class="select-btn selected" onclick="selectPlayers(2, this)">2 Players</div>
-            <div class="select-btn" onclick="selectPlayers(4, this)">4 Players</div>
-        </div>
-
-        <label style="font-size:11px; color:#cbd5e1;">💰 Bet Amount:</label>
-        <div class="selector-group">
-            <div class="select-btn selected" onclick="selectBet(100, this)">100</div>
-            <div class="select-btn" onclick="selectBet(500, this)">500</div>
-            <div class="select-btn" onclick="selectBet(2000, this)">2K</div>
-        </div>
-    </div>
-
-    <button onclick="createRoom()" class="main-btn btn-green">CREATE ROOM</button>
-    <div style="font-size:12px; margin:8px; color:#64748b;">— OR —</div>
-    <input id="roomCodeInput" placeholder="Room Code (e.g. A1B2C)">
-    <button onclick="joinRoom()" class="main-btn">JOIN ROOM</button>
-    
-    <!-- Daily Bonus -->
-    <div style="margin-top:20px;">
-      <button onclick="claimBonus()" class="main-btn btn-bonus">🎁 Daily Free Coins</button>
-    </div>
-  </div>
-</div>
-
-<!-- === SCREEN 2: LOBBY === -->
-<div id="lobbyScreen" class="screen">
-  <div class="panel">
-    <h4 style="color:#94a3b8; margin:0">Room Code</h4>
-    <h1 id="lobbyCode" style="font-size:36px; color:#facc15; letter-spacing:3px; margin:5px 0;">...</h1>
-    
-    <div id="lobbyInfo" style="font-size:12px; color:#4ade80;">...</div>
-
-    <div id="playerList" style="background:#1e293b; padding:10px; border-radius:8px; margin:15px 0; text-align:left; max-height:150px; overflow-y:auto;">
-      Waiting...
-    </div>
-
-    <p id="waitMsg" style="font-size:11px; color:#94a3b8;">Game starts automatically when full.</p>
-    <button onclick="location.reload()" style="background:#ef4444; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Leave</button>
-  </div>
-</div>
-
-<!-- === SCREEN 3: GAMEPLAY === -->
-<div id="gameArea">
-  <div style="position:absolute; top:50px; left:10px; font-size:11px; color:rgba(255,255,255,0.4);">
-      Pot: <span id="gamePot" style="color:#facc15; font-weight:bold;">0</span> 💰
-  </div>
+  <input id="pName" placeholder="Enter Nickname">
   
-  <button onclick="location.reload()" style="position:absolute; top:50px; right:10px; padding:4px 8px; background:#ef4444; color:white; border:none; border-radius:4px; cursor:pointer; font-size:10px;">Exit</button>
+  <div style="display:flex; gap:10px;">
+    <button class="btn btn-gold" onclick="createRoom()">Create Table</button>
+  </div>
+  <p>- OR -</p>
+  <div style="display:flex; gap:10px;">
+    <input id="code" placeholder="Room Code" style="width:100px; margin:0;">
+    <button class="btn" style="background:#fff;" onclick="joinRoom()">Join</button>
+  </div>
+</div>
 
-  <div class="opponents-row" id="opponentsDiv"></div>
+<!-- === BONEYARD POPUP (Draw Tiles) === -->
+<div id="boneyardModal">
+  <h2 style="color:white; margin-bottom:20px;">Draw a Domino</h2>
+  <div class="boneyard-grid" id="boneyardGrid">
+    <!-- Face down tiles will be injected here -->
+  </div>
+  <button onclick="closeBoneyard()" style="margin-top:30px; padding:10px 20px; background:red; color:white; border:none; border-radius:5px; cursor:pointer;">Cancel</button>
+</div>
 
-  <div id="pokerTable">
+<!-- === MAIN TABLE === -->
+<div id="table">
+  
+  <div class="top-bar">
+    <div class="badge"><i class="fas fa-wifi"></i> <span id="roomInfo">...</span></div>
+    <div class="badge">💰 <span id="myCoins">2000</span></div>
+  </div>
+
+  <!-- Opponents -->
+  <div class="opponents" id="opponents"></div>
+
+  <!-- Board -->
+  <div id="boardArea">
     <div id="boardScroll"></div>
-    <div id="centerText" style="color:rgba(255,255,255,0.15); font-size:24px; font-weight:bold;">DOMINO</div>
   </div>
 
+  <!-- My Hand -->
   <div class="my-area">
-    <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
-        <div id="turnStatus" style="font-size:12px; font-weight:bold; color:#facc15;">Connecting...</div>
-        <button onclick="drawTile()" style="background:#f59e0b; border:none; padding:4px 12px; border-radius:15px; cursor:pointer; font-weight:bold; font-size:12px; color:black;">🎲 Draw</button>
+    <div style="display:flex; justify-content:space-between; width:100%; margin-bottom:5px;">
+        <span id="turnMsg" style="color:white; font-weight:bold;">Connecting...</span>
+        <button id="drawBtn" onclick="openBoneyard()" style="background:#ff8c00; border:none; padding:5px 15px; border-radius:15px; font-weight:bold; cursor:pointer; color:black; display:none;">
+           Draw from Boneyard
+        </button>
     </div>
-    <div class="my-hand" id="myHandDiv"></div>
+    <div class="my-hand" id="myHand"></div>
   </div>
+
 </div>
 
 <!-- FIREBASE & LOGIC -->
 <script type="module">
-  // ============================================
-  // ✅ FIXED NUMBER (Note: Use Quotes " ")
-  const ADMIN_WHATSAPP = "971566932862"
-  // ============================================
-
-  document.getElementById("waLink").href = `https://wa.me/${ADMIN_WHATSAPP}?text=Hello Admin, I need help with Domino Game coins.`;
+  // 🟢 CONFIGURATION - আপনার হোয়াটসঅ্যাপ নাম্বার এখানে দিন
+  const ADMIN_WHATSAPP = "971566932862"; 
 
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
   import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
@@ -260,240 +224,195 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // --- STATE ---
-  let myName = localStorage.getItem("dominoName") || "";
-  if(myName) document.getElementById("playerName").value = myName;
-  
-  let myPlayerId = "";
-  let roomId = "";
-  let selectedPlayers = 2;
-  let selectedBet = 100;
-  let myCoins = parseInt(localStorage.getItem("dominoCoins"));
+  let myId, roomId, myName;
+  signInAnonymously(auth);
 
-  // First time User? Give 2000 Coins
-  if(!myCoins && myCoins !== 0) {
-      myCoins = 2000;
-      localStorage.setItem("dominoCoins", myCoins);
+  // --- DOT HELPER ---
+  const dotPos = {
+    0: [], 1: [4], 2: [2,6], 3: [2,4,6], 
+    4: [0,2,6,8], 5: [0,2,4,6,8], 6: [0,2,3,5,6,8]
+  };
+  function getPips(n) {
+    let h = "";
+    for(let i=0; i<9; i++) h += dotPos[n].includes(i) ? `<div class="dot"></div>` : `<div></div>`;
+    return `<div class="pips">${h}</div>`;
   }
 
-  // Update Coin Display immediately
-  document.getElementById("userCoins").innerText = myCoins;
-
-  signInAnonymously(auth).catch(e=>console.error(e));
-
-  // --- UI HELPERS ---
-  window.selectPlayers = (n,b) => { selectedPlayers=n; document.querySelectorAll('.select-btn').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); }
-  window.selectBet = (n,b) => { selectedBet=n; document.querySelectorAll('.bet-btn').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); }
-
-  function updateCoins(n){
-    myCoins = n;
-    localStorage.setItem("dominoCoins", myCoins);
-    document.getElementById("userCoins").innerText = myCoins;
-  }
-
-  // --- DAILY BONUS ---
-  window.claimBonus = function(){
-    let lastClaim = localStorage.getItem("lastBonus");
-    let today = new Date().toDateString();
-    if(lastClaim === today){
-      alert("❌ You already claimed today's bonus! Come back tomorrow.");
-    } else {
-      updateCoins(myCoins + 500);
-      localStorage.setItem("lastBonus", today);
-      alert("🎁 Success! Received 500 Free Coins.");
-    }
-  }
-
-  // --- CREATE ROOM ---
-  window.createRoom = async function(){
-    myName = document.getElementById("playerName").value || "Player";
-    localStorage.setItem("dominoName", myName);
-
-    if(myCoins < selectedBet) return alert("❌ Not enough coins! Contact Admin on WhatsApp.");
-
+  // --- ROOM LOGIC ---
+  window.createRoom = async () => {
+    myName = document.getElementById("pName").value || "Host";
     roomId = Math.random().toString(36).substring(2,7).toUpperCase();
-    myPlayerId = "p1";
-    updateCoins(myCoins - selectedBet);
+    myId = "p1";
+    let tiles = [];
+    for(let i=0;i<=6;i++) for(let j=i;j<=6;j++) tiles.push({a:i,b:j});
+    tiles.sort(()=>Math.random()-0.5);
 
     await setDoc(doc(db,"rooms",roomId), {
-      status: "lobby",
-      config: { max: selectedPlayers, bet: selectedBet },
-      players: { p1: { name: myName, tiles: [], gift: 0 } },
-      board: [], tiles: generateTiles(), turn: "p1", winner: null
+      board: [], tiles: tiles, turn: "p1",
+      players: { p1: { name: myName, tiles: [] } }
     });
-    enterLobby();
-  }
+    // Give 7 tiles
+    setTimeout(()=>drawTiles(7), 800);
+    enterGame();
+  };
 
-  // --- JOIN ROOM ---
-  window.joinRoom = async function(){
-    myName = document.getElementById("playerName").value || "Player";
-    roomId = document.getElementById("roomCodeInput").value.toUpperCase().trim();
-    if(!roomId) return alert("Enter Code");
-
+  window.joinRoom = async () => {
+    myName = document.getElementById("pName").value || "Guest";
+    roomId = document.getElementById("code").value.toUpperCase();
     const ref = doc(db,"rooms",roomId);
     const snap = await getDoc(ref);
-    if(!snap.exists()) return alert("Room not found");
-    
-    let data = snap.data();
-    if(data.status !== "lobby") return alert("Game already started");
-    if(Object.keys(data.players).length >= data.config.max) return alert("Room Full");
-    if(myCoins < data.config.bet) return alert("❌ Need "+data.config.bet+" coins! Ask friend for Gift.");
+    if(!snap.exists()) return alert("Room Invalid");
 
-    updateCoins(myCoins - data.config.bet);
-    let pid = "p" + (Object.keys(data.players).length + 1);
-    myPlayerId = pid;
-    
-    data.players[pid] = { name: myName, tiles: [], gift: 0 };
-    
-    // Auto Start
-    if(Object.keys(data.players).length === data.config.max){
-      data.status = "playing";
-      Object.keys(data.players).forEach(p => data.players[p].tiles = data.tiles.splice(0,7));
-    }
+    let d = snap.data();
+    let count = Object.keys(d.players).length;
+    if(count >= 4) return alert("Room Full");
 
-    await updateDoc(ref, { players: data.players, status: data.status, tiles: data.tiles });
-    enterLobby();
+    myId = "p"+(count+1);
+    d.players[myId] = { name: myName, tiles: [] };
+    await updateDoc(ref, { players: d.players });
+    // Give 7 tiles
+    setTimeout(()=>drawTiles(7), 800);
+    enterGame();
+  };
+
+  async function drawTiles(n){
+    const ref = doc(db,"rooms",roomId);
+    const s = await getDoc(ref);
+    let d = s.data();
+    if(d.tiles.length < n) return;
+    let hand = d.tiles.splice(0, n);
+    d.players[myId].tiles.push(...hand);
+    await updateDoc(ref, { players: d.players, tiles: d.tiles });
   }
 
-  function enterLobby(){
-    document.getElementById("menuScreen").classList.remove("active");
-    document.getElementById("lobbyScreen").classList.add("active");
-    document.getElementById("lobbyCode").innerText = roomId;
+  function enterGame(){
+    document.getElementById("login").style.display = "none";
+    document.getElementById("roomInfo").innerText = "Code: " + roomId;
+    onSnapshot(doc(db,"rooms",roomId), (snap) => render(snap.data()));
+  }
 
-    onSnapshot(doc(db,"rooms",roomId), (snap)=>{
-      let data = snap.data();
-      if(!data) return;
+  // --- RENDER ---
+  function render(g){
+    // 1. Status
+    let isTurn = (g.turn === myId);
+    let turnName = g.players[g.turn].name;
+    document.getElementById("turnMsg").innerHTML = isTurn ? 
+        `<span style="color:#4ade80">🟢 YOUR TURN</span>` : 
+        `<span style="color:#ffcc00">⏳ ${turnName}'s Turn</span>`;
 
-      // Check for Gifts received
-      if(data.players[myPlayerId] && data.players[myPlayerId].gift > 0){
-        let amount = data.players[myPlayerId].gift;
-        updateCoins(myCoins + amount);
-        alert(`🎁 You received ${amount} coins gift!`);
-        // Reset gift in DB
-        data.players[myPlayerId].gift = 0;
-        updateDoc(doc(db,"rooms",roomId), { players: data.players });
-      }
+    // 2. Draw Button Visibility
+    document.getElementById("drawBtn").style.display = (isTurn && g.tiles.length > 0) ? "block" : "none";
 
-      document.getElementById("lobbyInfo").innerHTML = `Entry: ${data.config.bet} 💰 | Need: ${data.config.max} Players`;
-      
-      let html = "";
-      Object.keys(data.players).forEach(pid => {
-        let p = data.players[pid];
-        let isMe = (pid === myPlayerId);
-        
-        html += `<div class="player-row">
-           <div style="color:white; font-size:12px;">👤 ${p.name} ${isMe?'(You)':''}</div>
-           ${!isMe ? `<button class="gift-btn" onclick="sendGift('${pid}')">🎁 Gift 500</button>` : ''}
+    // 3. Render Board
+    let bDiv = document.getElementById("boardScroll");
+    bDiv.innerHTML = "";
+    g.board.forEach(t => {
+      let isDouble = (t.a === t.b);
+      let cls = isDouble ? "tile tile-v" : "tile tile-h";
+      bDiv.innerHTML += `
+        <div class="${cls}">
+           ${getPips(t.a)}
+           <div class="${isDouble?'line-v':'line-h'}"></div>
+           ${getPips(t.b)}
         </div>`;
+    });
+
+    // 4. My Hand
+    let hDiv = document.getElementById("myHand");
+    hDiv.innerHTML = "";
+    if(g.players[myId]){
+      g.players[myId].tiles.forEach((t, i) => {
+        hDiv.innerHTML += `
+          <div class="hand-tile" onclick="playTile(${i})" style="cursor:pointer; ${isTurn?'border:2px solid #4ade80':''}">
+             ${getPips(t.a)}
+             <div style="width:100%;height:1px;background:#ccc"></div>
+             ${getPips(t.b)}
+          </div>`;
       });
-      document.getElementById("playerList").innerHTML = html;
+    }
 
-      if(data.status === "playing") startGame(data);
+    // 5. Opponents (Avatars)
+    let oppDiv = document.getElementById("opponents");
+    oppDiv.innerHTML = "";
+    Object.keys(g.players).forEach(pid => {
+       if(pid !== myId){
+         let p = g.players[pid];
+         oppDiv.innerHTML += `
+           <div class="avatar ${g.turn===pid?'active-player':''}">
+              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p.name}">
+              <div class="card-count">${p.tiles.length}</div>
+           </div>`;
+       }
     });
+
+    // Update Boneyard Count in Modal
+    window.remainingTiles = g.tiles.length;
   }
 
-  // --- GIFT LOGIC ---
-  window.sendGift = async function(targetPid){
-    if(myCoins < 500) return alert("❌ Not enough coins to gift!");
-    if(!confirm("Send 500 coins to this player?")) return;
-
-    const ref = doc(db,"rooms",roomId);
-    const snap = await getDoc(ref);
-    let data = snap.data();
-
-    // Deduct from me
-    updateCoins(myCoins - 500);
+  // --- BONEYARD LOGIC (Like Screenshot) ---
+  window.openBoneyard = () => {
+    let modal = document.getElementById("boneyardModal");
+    let grid = document.getElementById("boneyardGrid");
+    grid.innerHTML = "";
     
-    // Add pending gift to target
-    if(!data.players[targetPid].gift) data.players[targetPid].gift = 0;
-    data.players[targetPid].gift += 500;
+    // Generate facedown tiles visually
+    let count = window.remainingTiles || 0;
+    if(count === 0) return alert("Boneyard Empty");
 
-    await updateDoc(ref, { players: data.players });
-    alert("✅ Gift Sent!");
-  }
-
-  function startGame(data){
-    document.getElementById("lobbyScreen").classList.remove("active");
-    document.getElementById("gameArea").style.display = "block";
-    document.getElementById("gamePot").innerText = data.config.bet * data.config.max;
-    renderBoard(data);
-  }
-
-  function renderBoard(g){
-    if(g.status === "finished"){
-      if(g.winner === myPlayerId){
-        alert("🏆 YOU WON!");
-        updateCoins(myCoins + (g.config.bet * g.config.max));
-      } else {
-        alert("😢 You Lost!");
-      }
-      location.reload();
-      return;
+    // Limit visual tiles to max 14 for UI neatness
+    let visualCount = Math.min(count, 14); 
+    
+    for(let i=0; i<visualCount; i++){
+        let div = document.createElement("div");
+        div.className = "facedown-tile";
+        div.onclick = () => confirmDraw(); // Click any to draw
+        grid.appendChild(div);
     }
+    modal.style.display = "flex";
+  };
 
-    const bEl = document.getElementById("boardScroll");
-    bEl.innerHTML = "";
-    g.board.forEach(t => bEl.innerHTML += `<div class="tile"><div>${t.a}</div><div style="height:1px;width:100%;background:#ccc"></div><div>${t.b}</div></div>`);
-    if(g.board.length) document.getElementById("centerText").style.display="none";
+  window.closeBoneyard = () => {
+    document.getElementById("boneyardModal").style.display = "none";
+  };
 
-    const oppEl = document.getElementById("opponentsDiv");
-    const myEl = document.getElementById("myHandDiv");
-    oppEl.innerHTML=""; myEl.innerHTML="";
+  window.confirmDraw = async () => {
+    closeBoneyard();
+    await drawTiles(1); // Draw 1 real tile
+  };
 
-    Object.keys(g.players).sort().forEach(pid => {
-      let p = g.players[pid];
-      if(pid === myPlayerId){
-        document.getElementById("turnStatus").innerText = (g.turn===pid) ? "🟢 YOUR TURN" : `🔴 Wait for ${g.players[g.turn].name}`;
-        p.tiles.forEach((t,i) => {
-           myEl.innerHTML += `<div class="tile" onclick="playTile(${i})" style="${g.turn===pid?'border:2px solid #22c55e;transform:scale(1.1);cursor:pointer':''}"><div>${t.a}</div><div></div><div>${t.b}</div></div>`;
-        });
-      } else {
-        oppEl.innerHTML += `<div class="avatar-box ${g.turn===pid?'active-turn':''}"><div class="avatar-img"><i class="fas fa-user"></i></div><span style="background:red;border-radius:50%;width:18px;height:18px;font-size:10px;display:flex;justify-content:center;align-items:center;position:absolute;top:0;right:5px;">${p.tiles.length}</span><div style="font-size:9px;margin-top:2px;">${p.name}</div></div>`;
-      }
-    });
-  }
-
-  // --- GAME ACTIONS ---
-  function generateTiles(){ let t=[]; for(let i=0;i<=6;i++) for(let j=i;j<=6;j++) t.push({a:i,b:j}); return t.sort(()=>Math.random()-0.5); }
-
-  window.playTile = async function(idx){
+  // --- PLAY LOGIC ---
+  window.playTile = async (idx) => {
     const ref = doc(db,"rooms",roomId);
-    const snap = await getDoc(ref);
-    const g = snap.data();
-    if(g.turn !== myPlayerId) return;
+    const s = await getDoc(ref);
+    let g = s.data();
+    if(g.turn !== myId) return;
 
-    let t = g.players[myPlayerId].tiles[idx];
-    let played=false;
+    let t = g.players[myId].tiles[idx];
+    let played = false;
 
-    if(!g.board.length) { g.board.push(t); played=true; }
-    else {
-      let l=g.board[0].a, r=g.board[g.board.length-1].b;
-      if(r===t.a){ g.board.push(t); played=true; }
-      else if(r===t.b){ g.board.push({a:t.b,b:t.a}); played=true; }
-      else if(l===t.b){ g.board.unshift(t); played=true; }
-      else if(l===t.a){ g.board.unshift({a:t.b,b:t.a}); played=true; }
+    if(g.board.length === 0){
+      g.board.push(t); played = true;
+    } else {
+      let head = g.board[0].a;
+      let tail = g.board[g.board.length-1].b;
+      
+      if(tail === t.a) { g.board.push(t); played=true; }
+      else if(tail === t.b) { g.board.push({a:t.b,b:t.a}); played=true; }
+      else if(head === t.b) { g.board.unshift(t); played=true; }
+      else if(head === t.a) { g.board.unshift({a:t.b,b:t.a}); played=true; }
     }
 
-    if(!played) return alert("❌ Invalid Move! Tile doesn't match.");
-    g.players[myPlayerId].tiles.splice(idx,1);
+    if(!played) return alert("Tile doesn't match!");
 
-    if(!g.players[myPlayerId].tiles.length) await updateDoc(ref, { status:"finished", winner:myPlayerId });
-    else {
-      let ids = Object.keys(g.players).sort();
-      let next = ids[(ids.indexOf(myPlayerId)+1)%ids.length];
-      await updateDoc(ref, { board:g.board, players:g.players, turn:next });
-    }
-  }
+    g.players[myId].tiles.splice(idx,1);
+    
+    if(g.players[myId].tiles.length === 0) alert("🎉 YOU WON!");
 
-  window.drawTile = async function(){
-    const ref = doc(db,"rooms",roomId);
-    const snap = await getDoc(ref);
-    const g = snap.data();
-    if(g.turn!==myPlayerId) return;
-    if(!g.tiles.length) return alert("⚠️ Boneyard Empty!");
-    g.players[myPlayerId].tiles.push(g.tiles.pop());
-  await updateDoc(ref,{players:g.players, tiles:g.tiles});
-}
+    let ids = Object.keys(g.players).sort();
+    let next = ids[(ids.indexOf(myId)+1)%ids.length];
+    
+    await updateDoc(ref, { board: g.board, players: g.players, turn: next });
+  };
 </script>
 </body>
 </html>
