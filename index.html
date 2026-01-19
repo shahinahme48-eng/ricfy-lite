@@ -2,18 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Domino Pro Tournament</title>
+  <title>Domino Pro Ultimate</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  
-  <!-- ICONS & JITSI -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src='https://meet.jit.si/external_api.js'></script>
   
   <style>
-    /* --- 1. CORE STYLES --- */
+    /* --- CORE STYLES --- */
     body { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; user-select: none; }
 
-    /* --- 2. TABLE DESIGN (Real Green Felt) --- */
+    /* TABLE */
     #table {
       width: 100vw; height: 100vh;
       background: radial-gradient(circle at center, #1e6028 20%, #051a07 100%);
@@ -21,38 +19,44 @@
     }
     #table::before {
       content: ""; position: absolute; top:0; left:0; right:0; bottom:0;
-      border: 12px solid #3e2723; /* Wood Border */
-      box-shadow: inset 0 0 100px #000; pointer-events: none; z-index: 10;
+      border: 12px solid #3e2723; box-shadow: inset 0 0 100px #000;
+      pointer-events: none; z-index: 10;
     }
 
-    /* --- 3. TILES (3D Ivory Look) --- */
-    .tile {
-      background: linear-gradient(135deg, #fffbf0 0%, #dcd0b0 100%);
-      border-radius: 5px; 
-      box-shadow: 1px 1px 0 #bdae88, 2px 2px 0 #bdae88, 3px 3px 5px rgba(0,0,0,0.8);
-      position: relative; display: flex; box-sizing: border-box;
-      border: 1px solid #999; margin: 1px;
+    /* SCOREBOARD */
+    .scoreboard {
+      position: absolute; top: 70px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.8); padding: 5px 15px; border-radius: 15px;
+      color: gold; font-size: 12px; border: 1px solid #555; z-index: 15;
+      display: flex; gap: 15px; box-shadow: 0 5px 15px black;
     }
-    .tile-h { width: 64px; height: 32px; flex-direction: row; }
-    .tile-v { width: 32px; height: 64px; flex-direction: column; }
-    
-    .line-h { width: 1px; height: 100%; background: #bdc3c7; }
-    .line-v { width: 100%; height: 1px; background: #bdc3c7; }
+    .score-item b { color: white; margin-left: 5px; }
 
-    .pips { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 3px; }
-    .dot { width: 5px; height: 5px; background: #000; border-radius: 50%; margin: auto; box-shadow: inset 0 1px 1px rgba(255,255,255,0.9); }
-
-    /* --- 4. BOARD AREA (Auto Zoom) --- */
+    /* BOARD AREA */
     #boardArea {
       flex: 1; display: flex; align-items: center; justify-content: center;
       overflow: hidden; position: relative; width: 100%;
     }
     #boardScroll {
       display: flex; align-items: center; justify-content: center;
-      padding: 50px; transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      padding: 50px; transition: transform 0.5s ease;
     }
 
-    /* --- 5. PLAYER HAND (Smart Lighting) --- */
+    /* TILES */
+    .tile {
+      background: linear-gradient(135deg, #fffbf0 0%, #dcd0b0 100%);
+      border-radius: 5px; box-shadow: 2px 2px 5px rgba(0,0,0,0.8);
+      position: relative; display: flex; box-sizing: border-box;
+      border: 1px solid #999; margin: 1px;
+    }
+    .tile-h { width: 64px; height: 32px; flex-direction: row; }
+    .tile-v { width: 32px; height: 64px; flex-direction: column; }
+    .line-h { width: 1px; height: 100%; background: #bdc3c7; }
+    .line-v { width: 100%; height: 1px; background: #bdc3c7; }
+    .pips { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 3px; }
+    .dot { width: 5px; height: 5px; background: #000; border-radius: 50%; margin: auto; box-shadow: inset 0 1px 1px rgba(255,255,255,0.9); }
+
+    /* HAND AREA */
     .my-area {
       background: linear-gradient(to top, #000 0%, transparent 100%);
       padding: 10px; display: flex; flex-direction: column; align-items: center; z-index: 20; position: relative;
@@ -60,48 +64,23 @@
     .my-hand { display: flex; gap: 10px; overflow-x: auto; padding: 20px 10px; max-width: 100%; min-height: 90px; }
 
     .hand-tile {
-      width: 38px; height: 76px; background: #bbb; /* Dim Color */
+      width: 38px; height: 76px; background: #ccc; 
       display: flex; flex-direction: column; border-radius: 6px; 
       box-shadow: 0 5px 10px rgba(0,0,0,0.5); transition: all 0.3s; 
-      opacity: 0.5; transform: scale(0.9); pointer-events: none;
+      opacity: 0.6; transform: scale(0.9);
     }
-    /* Active Playable Tile */
     .playable {
       background: linear-gradient(135deg, #fff 0%, #fffbf0 100%);
       opacity: 1 !important; transform: scale(1.1) !important;
       box-shadow: 0 0 15px #ffd700, 0 0 5px white !important;
-      border: 2px solid gold; cursor: pointer; pointer-events: auto;
+      border: 2px solid gold; cursor: pointer;
       animation: bounce 1s infinite alternate;
     }
     @keyframes bounce { from { transform: translateY(0) scale(1.1); } to { transform: translateY(-5px) scale(1.1); } }
 
-    /* --- 6. DRAW BUTTON (Boneyard) --- */
-    #drawBtnContainer {
-        position: absolute; bottom: 130px; left: 50%; transform: translateX(-50%);
-        z-index: 50; display: none;
-    }
-    .draw-btn-pulse {
-        background: linear-gradient(to bottom, #ff9800, #e65100);
-        color: white; font-weight: bold; padding: 10px 25px;
-        border: 2px solid white; border-radius: 30px; font-size: 14px; cursor: pointer;
-        box-shadow: 0 0 20px #ff9800; animation: pulseBtn 0.8s infinite alternate;
-    }
-    @keyframes pulseBtn { from { transform: scale(1); } to { transform: scale(1.1); } }
-
-    /* --- 7. UI OVERLAYS --- */
+    /* UI ELEMENTS */
     .top-bar { position: absolute; top: 20px; left: 20px; z-index: 20; display: flex; gap: 10px; }
     .badge { background: rgba(0,0,0,0.6); color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; border: 1px solid #555; display:flex; align-items:center; gap:5px;}
-    
-    /* Scoreboard */
-    .scoreboard {
-      position: absolute; top: 70px; left: 50%; transform: translateX(-50%);
-      background: rgba(0,0,0,0.8); padding: 8px 20px; border-radius: 20px;
-      color: gold; font-size: 13px; border: 1px solid #666; z-index: 15;
-      display: flex; gap: 15px; box-shadow: 0 5px 15px black;
-    }
-    .score-item b { color: white; margin-left:5px; }
-
-    /* Avatars */
     .opponents { display: flex; justify-content: center; gap: 15px; padding-top: 25px; z-index: 15; }
     .avatar { width: 55px; height: 55px; border-radius: 50%; background: #333; border: 2px solid #555; position: relative; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.8); }
     .avatar img { width: 100%; height: 100%; border-radius: 50%; opacity: 0.6; }
@@ -109,37 +88,17 @@
     .active-player img { opacity: 1; }
     .card-count { position: absolute; bottom: -5px; right: -5px; background: #ef4444; color: white; width: 22px; height: 22px; border-radius: 50%; font-size: 11px; font-weight: bold; display: flex; justify-content: center; align-items: center; border: 2px solid white; }
 
-    /* Video Call */
-    #videoContainer {
-        display: none; position: absolute; top: 110px; right: 10px;
-        width: 150px; height: 200px; background: black;
-        border: 2px solid gold; border-radius: 10px; z-index: 80;
-        overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.8);
-    }
-    #videoToggleBtn {
-        position: absolute; top: 15px; right: 10px; z-index: 90;
-        background: #e11d48; color: white; border: none;
-        padding: 8px 15px; border-radius: 20px; cursor: pointer;
-        font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 5px;
-        box-shadow: 0 2px 5px black;
-    }
+    /* DRAW BUTTON */
+    #drawBtnContainer { position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%); z-index: 50; display: none; }
+    .draw-btn-pulse { background: linear-gradient(to bottom, #ff9800, #e65100); color: white; padding: 10px 25px; border-radius: 30px; border: 2px solid white; animation: pulseBtn 0.8s infinite alternate; cursor:pointer; font-weight:bold; font-size: 14px; box-shadow: 0 0 20px #ff9800;}
+    @keyframes pulseBtn { from { transform: scale(1); } to { transform: scale(1.1); } }
+
+    /* VIDEO CALL */
+    #videoContainer { display: none; position: absolute; top: 100px; right: 10px; width: 150px; height: 200px; background: black; border: 2px solid gold; border-radius: 10px; z-index: 80; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
+    #videoToggleBtn { position: absolute; top: 15px; right: 10px; z-index: 90; background: #e11d48; color: white; border: none; padding: 8px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 5px; }
     #closeVideo { position: absolute; top: 5px; right: 5px; background: red; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; z-index: 100; font-size: 12px; }
 
-    /* Modals */
-    .modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 3000; flex-direction: column; justify-content: center; align-items: center; animation: fadeIn 0.3s; }
-    .winner-box { background: linear-gradient(135deg, #ffd700, #ff8c00); padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 0 50px gold; border: 5px solid white; animation: popIn 0.5s; width: 85%; max-width: 400px; }
-    @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
-    .boneyard-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 80%; }
-    .facedown-tile { width: 36px; height: 68px; background: linear-gradient(135deg, #a8a29e 0%, #44403c 100%); border: 2px solid #d6d3d1; border-radius: 4px; cursor: pointer; }
-
-    /* Login Screen */
-    #login { position: absolute; top:0; left:0; width:100%; height:100%; background: #111; z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
-    input, select { padding: 12px; margin: 10px; border-radius: 8px; border: 1px solid #333; background:#222; color:white; text-align: center; font-size: 16px; width: 220px; }
-    .btn { padding: 12px 30px; margin: 5px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; }
-    .btn:active { transform: scale(0.95); }
-    .btn-gold { background: linear-gradient(to bottom, #facc15, #ca8a04); color: black; }
-
-    /* Chat */
+    /* CHAT */
     #chatIcon { position: absolute; bottom: 130px; right: 20px; z-index: 50; width: 50px; height: 50px; background: #3b82f6; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 24px; box-shadow: 0 0 15px #3b82f6; cursor: pointer; }
     #chatBox { display: none; position: absolute; bottom: 190px; right: 20px; width: 250px; height: 300px; background: rgba(0,0,0,0.9); border: 2px solid #333; border-radius: 10px; z-index: 60; flex-direction: column; overflow: hidden; }
     #chatMessages { flex: 1; overflow-y: auto; padding: 10px; font-size: 12px; color: white; display: flex; flex-direction: column; gap: 5px; }
@@ -148,11 +107,24 @@
     #chatInp { flex: 1; padding: 10px; border: none; background: #222; color: white; outline: none; }
     #sendBtn { padding: 0 15px; background: #3b82f6; color: white; border: none; cursor: pointer; }
 
+    /* LOGIN SCREEN */
+    #login { position: absolute; top:0; left:0; width:100%; height:100%; background: #111; z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
+    input, select { padding: 12px; margin: 8px; border-radius: 8px; border: 1px solid #333; background:#222; color:white; text-align: center; font-size: 16px; width: 240px; }
+    .btn { padding: 12px 30px; margin: 5px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; }
+    .btn-gold { background: linear-gradient(to bottom, #facc15, #ca8a04); color: black; }
+
+    /* MODALS */
+    .modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 3000; flex-direction: column; justify-content: center; align-items: center; }
+    .winner-box { background: linear-gradient(135deg, #ffd700, #ff8c00); padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 0 50px gold; border: 5px solid white; animation: popIn 0.5s; }
+    @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+    .boneyard-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 80%; }
+    .facedown-tile { width: 36px; height: 68px; background: linear-gradient(135deg, #a8a29e 0%, #44403c 100%); border: 2px solid #d6d3d1; border-radius: 4px; cursor: pointer; }
+
   </style>
 </head>
 <body>
 
-<!-- === LOGIN SCREEN === -->
+<!-- LOGIN -->
 <div id="login">
   <img src="https://cdn-icons-png.flaticon.com/512/566/566324.png" width="80" style="margin-bottom:20px;">
   <h1 style="margin:0; text-transform:uppercase; letter-spacing:2px; color:#facc15;">Domino Pro</h1>
@@ -160,12 +132,17 @@
   
   <input id="pName" placeholder="Enter Your Nickname">
   
-  <!-- Target Score -->
-  <div style="display:flex; align-items:center; gap:5px; color:#aaa; font-size:12px;">
-      <label>Target Score:</label>
+  <!-- SETTINGS -->
+  <div style="display:flex; flex-direction:column; gap:5px; margin-bottom:10px;">
       <select id="targetScore">
-          <option value="50">50 Points</option>
-          <option value="100">100 Points</option>
+          <option value="50">Target Score: 50</option>
+          <option value="100">Target Score: 100</option>
+      </select>
+      
+      <!-- PLAYER SELECT -->
+      <select id="playerCount">
+          <option value="2">2 Players</option>
+          <option value="4">4 Players</option>
       </select>
   </div>
 
@@ -177,7 +154,7 @@
   </div>
 </div>
 
-<!-- === WINNER MODAL === -->
+<!-- WINNER MODAL -->
 <div id="winnerModal" class="modal">
   <div class="winner-box">
     <h2 id="winTitle" style="margin:0; font-size:24px;">ROUND WINNER!</h2>
@@ -191,14 +168,14 @@
   </div>
 </div>
 
-<!-- === BONEYARD MODAL === -->
+<!-- BONEYARD -->
 <div id="boneyardModal" class="modal">
   <h2 style="color:white;">Draw Tile</h2>
   <div class="boneyard-grid" id="boneyardGrid"></div>
   <button onclick="closeBoneyard()" style="margin-top:20px; padding:10px; background:#333; color:white; border:none; border-radius:5px;">Cancel</button>
 </div>
 
-<!-- === GAME TABLE === -->
+<!-- GAME TABLE -->
 <div id="table">
   <div class="top-bar">
     <div class="badge"><i class="fas fa-wifi"></i> <span id="roomInfo">...</span></div>
@@ -221,7 +198,7 @@
     <div id="boardScroll"></div>
   </div>
 
-  <!-- DRAW BUTTON (Appears when needed) -->
+  <!-- DRAW BUTTON -->
   <div id="drawBtnContainer">
     <button class="draw-btn-pulse" onclick="openBoneyard()">🎲 DRAW CARD</button>
   </div>
@@ -242,9 +219,8 @@
   </div>
 </div>
 
-<!-- === LOGIC SCRIPT === -->
+<!-- LOGIC -->
 <script type="module">
-  // 🟢 CONFIGURATION
   const ADMIN_WHATSAPP = "971566932862"; 
 
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
@@ -264,11 +240,10 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  let myId, roomId, myName;
-  let lastTurnState = null; // For sound tracking
+  let myId, roomId, myName, lastTurnState = null;
   signInAnonymously(auth);
 
-  // --- SOUNDS ---
+  // SOUNDS
   const sndClick = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_c8c8a73467.mp3");
   const sndWin = new Audio("https://cdn.pixabay.com/audio/2021/08/04/audio_12b0c7443c.mp3");
   const sndTurn = new Audio("https://cdn.pixabay.com/audio/2022/03/24/audio_824e883b63.mp3");
@@ -282,43 +257,62 @@
   }
   function vibrate() { if(navigator.vibrate) navigator.vibrate(200); }
 
-  // --- UTILS ---
+  // DOTS
   const dotPos = { 0: [], 1: [4], 2: [2,6], 3: [2,4,6], 4: [0,2,6,8], 5: [0,2,4,6,8], 6: [0,2,3,5,6,8] };
   function getPips(n) {
     let h = ""; for(let i=0; i<9; i++) h += dotPos[n].includes(i) ? `<div class="dot"></div>` : `<div></div>`;
     return `<div class="pips">${h}</div>`;
   }
 
-  // --- ROOM SETUP ---
+  // --- GAME START ---
   window.createRoom = async () => {
     myName = document.getElementById("pName").value || "Host";
     let target = parseInt(document.getElementById("targetScore").value);
-    roomId = Math.random().toString(36).substring(2,6).toUpperCase();
-    myId = "p1";
-    let tiles = generateTiles();
-    await setDoc(doc(db,"rooms",roomId), {
-      board: [], tiles: tiles, turn: "p1", status: "playing",
-      targetScore: target, scores: { p1: 0 },
-      players: { p1: { name: myName, tiles: [] } }
-    });
-    setTimeout(()=>drawTiles(7), 800);
-    enterGame();
+    let maxP = parseInt(document.getElementById("playerCount").value); // New Feature
+    
+    try {
+        roomId = Math.random().toString(36).substring(2,6).toUpperCase();
+        myId = "p1";
+        let tiles = generateTiles();
+        
+        await setDoc(doc(db,"rooms",roomId), {
+          board: [], tiles: tiles, turn: "p1", status: "playing",
+          targetScore: target, maxPlayers: maxP, scores: { p1: 0 },
+          players: { p1: { name: myName, tiles: [] } }
+        });
+        
+        setTimeout(()=>drawTiles(7), 800);
+        enterGame();
+    } catch(e) {
+        alert("Error starting game! Check Internet/Firebase Rules.");
+        console.error(e);
+    }
   };
 
   window.joinRoom = async () => {
     myName = document.getElementById("pName").value || "Guest";
     roomId = document.getElementById("code").value.toUpperCase();
-    const ref = doc(db,"rooms",roomId);
-    const snap = await getDoc(ref);
-    if(!snap.exists()) return alert("Invalid Room");
-    let d = snap.data();
-    if(Object.keys(d.players).length >= 4) return alert("Full");
-    myId = "p"+(Object.keys(d.players).length+1);
-    d.players[myId] = { name: myName, tiles: [] };
-    if(!d.scores[myId]) d.scores[myId] = 0;
-    await updateDoc(ref, { players: d.players, scores: d.scores });
-    setTimeout(()=>drawTiles(7), 800);
-    enterGame();
+    
+    try {
+        const ref = doc(db,"rooms",roomId);
+        const snap = await getDoc(ref);
+        if(!snap.exists()) return alert("Room Not Found!");
+        
+        let d = snap.data();
+        let currentPlayers = Object.keys(d.players).length;
+        
+        if(currentPlayers >= d.maxPlayers) return alert("Room Full (Max " + d.maxPlayers + ")");
+        
+        myId = "p"+(currentPlayers+1);
+        d.players[myId] = { name: myName, tiles: [] };
+        if(!d.scores[myId]) d.scores[myId] = 0;
+        
+        await updateDoc(ref, { players: d.players, scores: d.scores });
+        setTimeout(()=>drawTiles(7), 800);
+        enterGame();
+    } catch(e) {
+        alert("Connection Error!");
+    }
   };
 
   function generateTiles(){
@@ -342,7 +336,7 @@
     onSnapshot(doc(db,"rooms",roomId), (snap) => render(snap.data()));
   }
 
-  // --- RENDER ENGINE ---
+  // --- RENDER ---
   function render(g){
     document.getElementById("targetDisplay").innerText = g.targetScore;
 
@@ -353,16 +347,15 @@
     });
     document.getElementById("scoreboard").innerHTML = scoreHtml;
 
-    // Auto Restart Check
+    // Auto Restart
     if(g.status === "playing" && document.getElementById("winnerModal").style.display === "flex"){
         document.getElementById("winnerModal").style.display = "none";
         if(g.players[myId].tiles.length === 0) setTimeout(()=>drawTiles(7), 500);
     }
 
-    // WIN MODAL
+    // Win Modal
     if(g.status === "round_finished" || g.status === "match_finished") {
         if(document.getElementById("winnerModal").style.display !== "flex") playSound('win');
-        
         let modal = document.getElementById("winnerModal");
         modal.style.display = "flex";
         
@@ -393,22 +386,16 @@
         return;
     }
 
-    // Turn Logic & Sound
+    // Game Logic
     let isTurn = (g.turn === myId);
-    if(isTurn && lastTurnState !== myId) {
-        playSound('turn');
-        vibrate();
-        lastTurnState = myId;
-    } else if(!isTurn) {
-        lastTurnState = null;
-    }
+    if(isTurn && lastTurnState !== myId) { playSound('turn'); vibrate(); lastTurnState = myId; } 
+    else if(!isTurn) { lastTurnState = null; }
 
     let hasMove = canPlayAny(g);
     document.getElementById("drawBtnContainer").style.display = (isTurn && !hasMove && g.tiles.length > 0) ? "block" : "none";
-    document.getElementById("turnMsg").innerHTML = isTurn ? (hasMove ? `<span style="color:#4ade80">🟢 YOUR TURN</span>` : `<span style="color:#ff9800">⚠️ No moves! Draw card.</span>`) : `<span style="color:#aaa">Waiting for ${g.players[g.turn].name}...</span>`;
+    document.getElementById("turnMsg").innerHTML = isTurn ? (hasMove ? `<span style="color:#4ade80">🟢 YOUR TURN</span>` : `<span style="color:#ff9800">⚠️ No moves! Draw card.</span>`) : `<span style="color:#aaa">Waiting for ${g.players[g.turn]?.name}...</span>`;
 
-    // Render Board
-    lelet bDiv = document.getElementById("boardScroll");
+    let bDiv = document.getElementById("boardScroll");
     bDiv.innerHTML = "";
     g.board.forEach(t => {
       let isDouble = (t.a === t.b);
@@ -456,7 +443,6 @@
       return g.players[myId].tiles.some(t => t.a===h || t.b===h || t.a===tl || t.b===tl);
   }
 
-  // --- ACTIONS ---
   window.openBoneyard = () => {
       let grid = document.getElementById("boneyardGrid");
       grid.innerHTML = "";
@@ -471,9 +457,8 @@
   window.closeBoneyard = () => document.getElementById("boneyardModal").style.display="none";
   window.confirmDraw = async () => { closeBoneyard(); await drawTiles(1); };
 
-  // --- PLAY & SCORE LOGIC ---
   window.playTile = async (idx) => {
-    playSound('click'); // Sound
+    playSound('click');
     const ref = doc(db,"rooms",roomId);
     const s = await getDoc(ref);
     let g = s.data();
@@ -491,7 +476,6 @@
     if(!played) return;
     g.players[myId].tiles.splice(idx,1);
 
-    // WIN LOGIC (SCORING)
     if(g.players[myId].tiles.length === 0) {
         let roundPoints = 0;
         Object.keys(g.players).forEach(pid => {
@@ -513,22 +497,18 @@
     }
   };
 
-  // --- NEXT ROUND ---
   window.nextRound = async () => {
       const ref = doc(db,"rooms",roomId);
       const s = await getDoc(ref);
       let g = s.data();
-      
       let newTiles = generateTiles();
       Object.keys(g.players).forEach(pid => g.players[pid].tiles = []);
-      
       await updateDoc(ref, {
           board: [], tiles: newTiles, status: "playing",
-          players: g.players, winner: null, turn: g.winner // Winner starts next
+          players: g.players, winner: null, turn: g.winner
       });
   };
 
-  // --- CHAT ---
   window.toggleChat = () => { let b = document.getElementById("chatBox"); b.style.display = b.style.display==="flex"?"none":"flex"; };
   window.sendChat = async () => {
       let inp = document.getElementById("chatInp"); if(!inp.value) return;
@@ -541,7 +521,6 @@
       div.scrollTop = div.scrollHeight;
   }
 
-  // --- VIDEO CALL (HD) ---
   let jitsiApi = null;
   window.toggleVideo = () => {
       let box = document.getElementById("videoContainer");
