@@ -1,70 +1,89 @@
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #020617;
-  color: white;
-  text-align: center;
+{
+  box-sizing:border-box;
+  font-family:Arial, Helvetica, sans-serif;
 }
 
-header {
-  padding: 10px;
-  border-bottom: 1px solid #1e293b;
+body{
+  margin:0;
+  background:#020617;
+  color:white;
+  text-align:center;
 }
 
-.controls input, #chatInput {
-  padding: 6px;
-  margin: 4px;
+header{
+  padding:10px;
+  border-bottom:1px solid #1e293b;
 }
 
-.controls button, #chatBtn {
-  padding: 6px 10px;
-  margin: 4px;
-  cursor: pointer;
+.controls{
+  padding:10px;
 }
 
-#board {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 10px;
+.controls input{
+  padding:6px;
+  margin:4px;
+  width:120px;
 }
 
-.players {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  padding: 10px;
+.controls button{
+  padding:6px 10px;
+  margin:4px;
+  cursor:pointer;
 }
 
-.hand { min-height: 60px; }
-
-.tile {
-  background: #f8fafc;
-  color: black;
-  padding: 8px;
-  border-radius: 6px;
-  display: inline-block;
-  margin: 4px;
-  cursor: pointer;
-  font-weight: bold;
+#board{
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:6px;
+  padding:10px;
+  min-height:60px;
 }
 
-#drawBtn {
-  width: 90%;
-  margin: 10px;
-  padding: 10px;
-  background: #22c55e;
-  border: none;
-  border-radius: 10px;
-  font-size: 16px;
-  cursor: pointer;
+.tile{
+  background:#f8fafc;
+  color:black;
+  padding:8px 10px;
+  border-radius:6px;
+  font-weight:bold;
+  cursor:pointer;
 }
 
-#chatBox {
-  max-height: 120px;
-  overflow-y: auto;
-  border: 1px solid #38bdf8;
-  margin: 5px;
-  padding: 5px;
+.players{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  padding:10px;
+}
+
+.hand{
+  min-height:50px;
+  border:1px dashed #334155;
+  padding:6px;
+}
+
+#drawBtn{
+  width:90%;
+  margin:10px auto;
+  padding:10px;
+  font-size:16px;
+  background:#22c55e;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+#chatBox{
+  max-height:120px;
+  overflow-y:auto;
+  border:1px solid #38bdf8;
+  margin:6px;
+  padding:6px;
+  text-align:left;
+  font-size:14px;
+}
+
+#chatInput{
+  width:70%;
+  padding:6px;
 }
