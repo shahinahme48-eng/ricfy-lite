@@ -4,57 +4,58 @@
   <meta charset="UTF-8">
   <title>Online Domino 4 Player</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
-
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#22c55e">
 </head>
 <body>
 
 <header>
   <h1>🎴 Online Domino</h1>
-  <div id="status">Not Connected</div>
+  <div id="status">Status: Not Connected</div>
 </header>
 
-<div class="controls">
-  <input id="playerName" placeholder="Your Name">
-  <button onclick="createRoom()">Create Room</button>
+<div class="container">
+  <div class="controls">
+    <input id="playerName" placeholder="Your Name">
+    <button onclick="createRoom()">Create Room</button>
+    <br><br>
+    <input id="roomCode" placeholder="Room Code">
+    <button onclick="joinRoom()">Join Room</button>
+  </div>
 
-  <input id="roomCode" placeholder="Room Code">
-  <button onclick="joinRoom()">Join Room</button>
+  <h3>Board</h3>
+  <!-- বোর্ড এরিয়া -->
+  <div id="boardContainer">
+    <div id="board"></div>
+  </div>
+
+  <div class="players">
+    <div>
+      <h4 id="name-p1">Player 1</h4>
+      <div id="p1" class="hand"></div>
+    </div>
+    <div>
+      <h4 id="name-p2">Player 2</h4>
+      <div id="p2" class="hand"></div>
+    </div>
+    <div>
+      <h4 id="name-p3">Player 3</h4>
+      <div id="p3" class="hand"></div>
+    </div>
+    <div>
+      <h4 id="name-p4">Player 4</h4>
+      <div id="p4" class="hand"></div>
+    </div>
+  </div>
+
+  <button id="drawBtn" onclick="drawTile()">🎲 Draw Tile from Boneyard</button>
+
+  <h3>Chat</h3>
+  <div id="chatBox"></div>
+  <div style="display:flex; gap:5px; padding:10px;">
+    <input id="chatInput" placeholder="Type message..." style="flex:1;">
+    <button onclick="sendChat()">Send</button>
+  </div>
 </div>
-
-<h3>Board</h3>
-<div id="board"></div>
-
-<div class="players">
-  <div>
-    <h4>Player 1</h4>
-    <div id="p1" class="hand"></div>
-  </div>
-  <div>
-    <h4>Player 2</h4>
-    <div id="p2" class="hand"></div>
-  </div>
-  <div>
-    <h4>Player 3</h4>
-    <div id="p3" class="hand"></div>
-  </div>
-  <div>
-    <h4>Player 4</h4>
-    <div id="p4" class="hand"></div>
-  </div>
-</div>
-
-<button id="drawBtn" onclick="drawTile()">🎲 Draw Tile</button>
-
-<h3>Chat</h3>
-<div id="chatBox"></div>
-<input id="chatInput" placeholder="Type message">
-<button onclick="sendChat()">Send</button>
 
 <script type="module" src="script.js"></script>
 </body>
