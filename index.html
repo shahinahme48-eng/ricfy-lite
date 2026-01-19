@@ -1,19 +1,19 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Domino Pro Video</title>
+  <title>Domino Pro Tournament</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- JITSI MEET API (FREE VIDEO CALL) -->
+  <!-- ICONS & JITSI -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src='https://meet.jit.si/external_api.js'></script>
   
   <style>
-    /* --- CORE --- */
+    /* --- 1. CORE STYLES --- */
     body { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; user-select: none; }
 
-    /* --- TABLE --- */
+    /* --- 2. TABLE DESIGN (Real Green Felt) --- */
     #table {
       width: 100vw; height: 100vh;
       background: radial-gradient(circle at center, #1e6028 20%, #051a07 100%);
@@ -21,11 +21,28 @@
     }
     #table::before {
       content: ""; position: absolute; top:0; left:0; right:0; bottom:0;
-      border: 12px solid #3e2723; box-shadow: inset 0 0 100px #000;
-      pointer-events: none; z-index: 10;
+      border: 12px solid #3e2723; /* Wood Border */
+      box-shadow: inset 0 0 100px #000; pointer-events: none; z-index: 10;
     }
 
-    /* --- BOARD --- */
+    /* --- 3. TILES (3D Ivory Look) --- */
+    .tile {
+      background: linear-gradient(135deg, #fffbf0 0%, #dcd0b0 100%);
+      border-radius: 5px; 
+      box-shadow: 1px 1px 0 #bdae88, 2px 2px 0 #bdae88, 3px 3px 5px rgba(0,0,0,0.8);
+      position: relative; display: flex; box-sizing: border-box;
+      border: 1px solid #999; margin: 1px;
+    }
+    .tile-h { width: 64px; height: 32px; flex-direction: row; }
+    .tile-v { width: 32px; height: 64px; flex-direction: column; }
+    
+    .line-h { width: 1px; height: 100%; background: #bdc3c7; }
+    .line-v { width: 100%; height: 1px; background: #bdc3c7; }
+
+    .pips { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 3px; }
+    .dot { width: 5px; height: 5px; background: #000; border-radius: 50%; margin: auto; box-shadow: inset 0 1px 1px rgba(255,255,255,0.9); }
+
+    /* --- 4. BOARD AREA (Auto Zoom) --- */
     #boardArea {
       flex: 1; display: flex; align-items: center; justify-content: center;
       overflow: hidden; position: relative; width: 100%;
@@ -35,21 +52,7 @@
       padding: 50px; transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
-    /* --- TILES --- */
-    .tile {
-      background: linear-gradient(135deg, #fffbf0 0%, #dcd0b0 100%);
-      border-radius: 5px; box-shadow: 2px 2px 5px rgba(0,0,0,0.8);
-      position: relative; display: flex; box-sizing: border-box;
-      border: 1px solid #999; margin: 1px;
-    }
-    .tile-h { width: 64px; height: 32px; flex-direction: row; }
-    .tile-v { width: 32px; height: 64px; flex-direction: column; }
-    .line-h { width: 1px; height: 100%; background: #bdc3c7; }
-    .line-v { width: 100%; height: 1px; background: #bdc3c7; }
-    .pips { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 3px; }
-    .dot { width: 5px; height: 5px; background: #000; border-radius: 50%; margin: auto; box-shadow: inset 0 1px 1px rgba(255,255,255,0.9); }
-
-    /* --- HAND --- */
+    /* --- 5. PLAYER HAND (Smart Lighting) --- */
     .my-area {
       background: linear-gradient(to top, #000 0%, transparent 100%);
       padding: 10px; display: flex; flex-direction: column; align-items: center; z-index: 20; position: relative;
@@ -57,62 +60,24 @@
     .my-hand { display: flex; gap: 10px; overflow-x: auto; padding: 20px 10px; max-width: 100%; min-height: 90px; }
 
     .hand-tile {
-      width: 38px; height: 76px; background: #ccc; 
+      width: 38px; height: 76px; background: #bbb; /* Dim Color */
       display: flex; flex-direction: column; border-radius: 6px; 
       box-shadow: 0 5px 10px rgba(0,0,0,0.5); transition: all 0.3s; 
-      opacity: 0.6; transform: scale(0.9);
+      opacity: 0.5; transform: scale(0.9); pointer-events: none;
     }
+    /* Active Playable Tile */
     .playable {
       background: linear-gradient(135deg, #fff 0%, #fffbf0 100%);
       opacity: 1 !important; transform: scale(1.1) !important;
       box-shadow: 0 0 15px #ffd700, 0 0 5px white !important;
-      border: 2px solid gold; cursor: pointer;
+      border: 2px solid gold; cursor: pointer; pointer-events: auto;
       animation: bounce 1s infinite alternate;
     }
     @keyframes bounce { from { transform: translateY(0) scale(1.1); } to { transform: translateY(-5px) scale(1.1); } }
 
-    /* --- VIDEO CALL BOX (NEW) --- */
-    #videoContainer {
-        display: none; position: absolute; top: 60px; right: 10px;
-        width: 150px; height: 200px; background: black;
-        border: 2px solid gold; border-radius: 10px; z-index: 80;
-        overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.8);
-    }
-    #videoToggleBtn {
-        position: absolute; top: 20px; right: 10px; z-index: 90;
-        background: #e11d48; color: white; border: none;
-        padding: 8px 12px; border-radius: 20px; cursor: pointer;
-        font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 5px;
-        box-shadow: 0 2px 5px black;
-    }
-    #closeVideo {
-        position: absolute; top: 5px; right: 5px; background: red; color: white;
-        border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; z-index: 100;
-        font-size: 12px;
-    }
-
-    /* --- CHAT --- */
-    #chatIcon {
-        position: absolute; bottom: 120px; right: 20px; z-index: 50;
-        width: 50px; height: 50px; background: #3b82f6; border-radius: 50%;
-        display: flex; justify-content: center; align-items: center;
-        color: white; font-size: 24px; box-shadow: 0 0 15px #3b82f6; cursor: pointer;
-    }
-    #chatBox {
-        display: none; position: absolute; bottom: 180px; right: 20px; width: 250px; height: 300px;
-        background: rgba(0,0,0,0.9); border: 2px solid #333; border-radius: 10px;
-        z-index: 60; flex-direction: column; overflow: hidden;
-    }
-    #chatMessages { flex: 1; overflow-y: auto; padding: 10px; font-size: 12px; color: white; display: flex; flex-direction: column; gap: 5px; }
-    .chat-bubble { background: #333; padding: 5px 10px; border-radius: 10px; max-width: 80%; }
-    .chat-bubble b { color: #facc15; }
-    .chat-input-area { display: flex; border-top: 1px solid #333; }
-    #chatInp { flex: 1; padding: 10px; border: none; background: #222; color: white; outline: none; }
-    #sendBtn { padding: 0 15px; background: #3b82f6; color: white; border: none; cursor: pointer; }
-
-    /* --- DRAW BUTTON --- */
+    /* --- 6. DRAW BUTTON (Boneyard) --- */
     #drawBtnContainer {
-        position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%);
+        position: absolute; bottom: 130px; left: 50%; transform: translateX(-50%);
         z-index: 50; display: none;
     }
     .draw-btn-pulse {
@@ -123,9 +88,20 @@
     }
     @keyframes pulseBtn { from { transform: scale(1); } to { transform: scale(1.1); } }
 
-    /* --- UI ELEMENTS --- */
+    /* --- 7. UI OVERLAYS --- */
     .top-bar { position: absolute; top: 20px; left: 20px; z-index: 20; display: flex; gap: 10px; }
     .badge { background: rgba(0,0,0,0.6); color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; border: 1px solid #555; display:flex; align-items:center; gap:5px;}
+    
+    /* Scoreboard */
+    .scoreboard {
+      position: absolute; top: 70px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.8); padding: 8px 20px; border-radius: 20px;
+      color: gold; font-size: 13px; border: 1px solid #666; z-index: 15;
+      display: flex; gap: 15px; box-shadow: 0 5px 15px black;
+    }
+    .score-item b { color: white; margin-left:5px; }
+
+    /* Avatars */
     .opponents { display: flex; justify-content: center; gap: 15px; padding-top: 25px; z-index: 15; }
     .avatar { width: 55px; height: 55px; border-radius: 50%; background: #333; border: 2px solid #555; position: relative; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.8); }
     .avatar img { width: 100%; height: 100%; border-radius: 50%; opacity: 0.6; }
@@ -133,26 +109,66 @@
     .active-player img { opacity: 1; }
     .card-count { position: absolute; bottom: -5px; right: -5px; background: #ef4444; color: white; width: 22px; height: 22px; border-radius: 50%; font-size: 11px; font-weight: bold; display: flex; justify-content: center; align-items: center; border: 2px solid white; }
 
-    .modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 3000; flex-direction: column; justify-content: center; align-items: center; }
-    .winner-box { background: linear-gradient(135deg, #ffd700, #ff8c00); padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 0 50px gold; border: 5px solid white; animation: popIn 0.5s; }
+    /* Video Call */
+    #videoContainer {
+        display: none; position: absolute; top: 110px; right: 10px;
+        width: 150px; height: 200px; background: black;
+        border: 2px solid gold; border-radius: 10px; z-index: 80;
+        overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    }
+    #videoToggleBtn {
+        position: absolute; top: 15px; right: 10px; z-index: 90;
+        background: #e11d48; color: white; border: none;
+        padding: 8px 15px; border-radius: 20px; cursor: pointer;
+        font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 5px;
+        box-shadow: 0 2px 5px black;
+    }
+    #closeVideo { position: absolute; top: 5px; right: 5px; background: red; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; z-index: 100; font-size: 12px; }
+
+    /* Modals */
+    .modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 3000; flex-direction: column; justify-content: center; align-items: center; animation: fadeIn 0.3s; }
+    .winner-box { background: linear-gradient(135deg, #ffd700, #ff8c00); padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 0 50px gold; border: 5px solid white; animation: popIn 0.5s; width: 85%; max-width: 400px; }
     @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
     .boneyard-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 80%; }
     .facedown-tile { width: 36px; height: 68px; background: linear-gradient(135deg, #a8a29e 0%, #44403c 100%); border: 2px solid #d6d3d1; border-radius: 4px; cursor: pointer; }
 
+    /* Login Screen */
     #login { position: absolute; top:0; left:0; width:100%; height:100%; background: #111; z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
-    input { padding: 12px; margin: 10px; border-radius: 8px; border: 1px solid #333; background:#222; color:white; text-align: center; font-size: 16px; width: 200px; }
+    input, select { padding: 12px; margin: 10px; border-radius: 8px; border: 1px solid #333; background:#222; color:white; text-align: center; font-size: 16px; width: 220px; }
     .btn { padding: 12px 30px; margin: 5px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; }
+    .btn:active { transform: scale(0.95); }
     .btn-gold { background: linear-gradient(to bottom, #facc15, #ca8a04); color: black; }
+
+    /* Chat */
+    #chatIcon { position: absolute; bottom: 130px; right: 20px; z-index: 50; width: 50px; height: 50px; background: #3b82f6; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 24px; box-shadow: 0 0 15px #3b82f6; cursor: pointer; }
+    #chatBox { display: none; position: absolute; bottom: 190px; right: 20px; width: 250px; height: 300px; background: rgba(0,0,0,0.9); border: 2px solid #333; border-radius: 10px; z-index: 60; flex-direction: column; overflow: hidden; }
+    #chatMessages { flex: 1; overflow-y: auto; padding: 10px; font-size: 12px; color: white; display: flex; flex-direction: column; gap: 5px; }
+    .chat-bubble { background: #333; padding: 5px 10px; border-radius: 10px; max-width: 80%; }
+    .chat-input-area { display: flex; border-top: 1px solid #333; }
+    #chatInp { flex: 1; padding: 10px; border: none; background: #222; color: white; outline: none; }
+    #sendBtn { padding: 0 15px; background: #3b82f6; color: white; border: none; cursor: pointer; }
 
   </style>
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- === LOGIN SCREEN === -->
 <div id="login">
   <img src="https://cdn-icons-png.flaticon.com/512/566/566324.png" width="80" style="margin-bottom:20px;">
   <h1 style="margin:0; text-transform:uppercase; letter-spacing:2px; color:#facc15;">Domino Pro</h1>
-  <input id="pName" placeholder="Your Nickname">
+  <p style="color:#888; font-size:12px; margin-bottom:20px;">Sound 🔊 | Vibration 📳 | HD Video 🎥</p>
+  
+  <input id="pName" placeholder="Enter Your Nickname">
+  
+  <!-- Target Score -->
+  <div style="display:flex; align-items:center; gap:5px; color:#aaa; font-size:12px;">
+      <label>Target Score:</label>
+      <select id="targetScore">
+          <option value="50">50 Points</option>
+          <option value="100">100 Points</option>
+      </select>
+  </div>
+
   <button class="btn btn-gold" onclick="createRoom()">Create New Table</button>
   <p style="color:#555; font-size:12px;">- OR -</p>
   <div style="display:flex; gap:10px;">
@@ -161,34 +177,39 @@
   </div>
 </div>
 
-<!-- GAME OVER -->
-<div id="gameOverModal" class="modal">
+<!-- === WINNER MODAL === -->
+<div id="winnerModal" class="modal">
   <div class="winner-box">
-    <h1 style="font-size: 40px; margin:0;">🏆 WINNER!</h1>
-    <h2 id="winnerName" style="color: black; margin: 10px;">Player Name</h2>
-    <div style="font-size: 50px;">🎉</div>
-    <button id="restartBtn" onclick="resetGame()" class="btn" style="background:black; color:white; margin-top:20px;">Start New Round 🔄</button>
-    <p id="waitHostMsg" style="font-size:12px; color:black; margin-top:10px; display:none;">Waiting for host to restart...</p>
+    <h2 id="winTitle" style="margin:0; font-size:24px;">ROUND WINNER!</h2>
+    <h1 id="winnerName" style="color: black; margin: 10px; font-size:32px;">Player Name</h1>
+    <p id="winPoints" style="color:black; font-weight:bold;">+0 Points</p>
+    <div style="font-size: 40px;">🎉</div>
+    
+    <button id="nextRoundBtn" onclick="nextRound()" class="btn" style="background:black; color:white; margin-top:20px; display:none;">Next Round ➡️</button>
+    <button id="mainMenuBtn" onclick="location.reload()" class="btn" style="background:red; color:white; margin-top:20px; display:none;">🏆 Main Menu</button>
+    <p id="waitMsg" style="font-size:12px; color:black; margin-top:10px;">Waiting for host...</p>
   </div>
 </div>
 
-<!-- BONEYARD -->
+<!-- === BONEYARD MODAL === -->
 <div id="boneyardModal" class="modal">
   <h2 style="color:white;">Draw Tile</h2>
   <div class="boneyard-grid" id="boneyardGrid"></div>
   <button onclick="closeBoneyard()" style="margin-top:20px; padding:10px; background:#333; color:white; border:none; border-radius:5px;">Cancel</button>
 </div>
 
-<!-- TABLE -->
+<!-- === GAME TABLE === -->
 <div id="table">
   <div class="top-bar">
     <div class="badge"><i class="fas fa-wifi"></i> <span id="roomInfo">...</span></div>
+    <div class="badge">Goal: <span id="targetDisplay">50</span></div>
   </div>
 
-  <!-- VIDEO CALL BUTTON -->
-  <button id="videoToggleBtn" onclick="toggleVideo()">🎥 Video</button>
+  <!-- SCOREBOARD -->
+  <div class="scoreboard" id="scoreboard"></div>
 
-  <!-- VIDEO CONTAINER -->
+  <!-- VIDEO CALL -->
+  <button id="videoToggleBtn" onclick="toggleVideo()">🎥 Video HD</button>
   <div id="videoContainer">
       <button id="closeVideo" onclick="toggleVideo()">X</button>
       <div id="jitsiFrame" style="width:100%; height:100%;"></div>
@@ -200,6 +221,7 @@
     <div id="boardScroll"></div>
   </div>
 
+  <!-- DRAW BUTTON (Appears when needed) -->
   <div id="drawBtnContainer">
     <button class="draw-btn-pulse" onclick="openBoneyard()">🎲 DRAW CARD</button>
   </div>
@@ -220,8 +242,9 @@
   </div>
 </div>
 
-<!-- LOGIC -->
+<!-- === LOGIC SCRIPT === -->
 <script type="module">
+  // 🟢 CONFIGURATION
   const ADMIN_WHATSAPP = "971566932862"; 
 
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
@@ -242,22 +265,40 @@
   const db = getFirestore(app);
 
   let myId, roomId, myName;
+  let lastTurnState = null; // For sound tracking
   signInAnonymously(auth);
 
+  // --- SOUNDS ---
+  const sndClick = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_c8c8a73467.mp3");
+  const sndWin = new Audio("https://cdn.pixabay.com/audio/2021/08/04/audio_12b0c7443c.mp3");
+  const sndTurn = new Audio("https://cdn.pixabay.com/audio/2022/03/24/audio_824e883b63.mp3");
+
+  function playSound(type) {
+      try {
+          if(type==='click') { sndClick.currentTime=0; sndClick.play(); }
+          if(type==='win') { sndWin.currentTime=0; sndWin.play(); }
+          if(type==='turn') { sndTurn.currentTime=0; sndTurn.play(); }
+      } catch(e){}
+  }
+  function vibrate() { if(navigator.vibrate) navigator.vibrate(200); }
+
+  // --- UTILS ---
   const dotPos = { 0: [], 1: [4], 2: [2,6], 3: [2,4,6], 4: [0,2,6,8], 5: [0,2,4,6,8], 6: [0,2,3,5,6,8] };
   function getPips(n) {
     let h = ""; for(let i=0; i<9; i++) h += dotPos[n].includes(i) ? `<div class="dot"></div>` : `<div></div>`;
     return `<div class="pips">${h}</div>`;
   }
 
-  // --- GAME START ---
+  // --- ROOM SETUP ---
   window.createRoom = async () => {
     myName = document.getElementById("pName").value || "Host";
+    let target = parseInt(document.getElementById("targetScore").value);
     roomId = Math.random().toString(36).substring(2,6).toUpperCase();
     myId = "p1";
     let tiles = generateTiles();
     await setDoc(doc(db,"rooms",roomId), {
-      board: [], tiles: tiles, turn: "p1", status: "playing", chats: [],
+      board: [], tiles: tiles, turn: "p1", status: "playing",
+      targetScore: target, scores: { p1: 0 },
       players: { p1: { name: myName, tiles: [] } }
     });
     setTimeout(()=>drawTiles(7), 800);
@@ -274,7 +315,8 @@
     if(Object.keys(d.players).length >= 4) return alert("Full");
     myId = "p"+(Object.keys(d.players).length+1);
     d.players[myId] = { name: myName, tiles: [] };
-    await updateDoc(ref, { players: d.players });
+    if(!d.scores[myId]) d.scores[myId] = 0;
+    await updateDoc(ref, { players: d.players, scores: d.scores });
     setTimeout(()=>drawTiles(7), 800);
     enterGame();
   };
@@ -300,32 +342,73 @@
     onSnapshot(doc(db,"rooms",roomId), (snap) => render(snap.data()));
   }
 
-  // --- RENDER ---
+  // --- RENDER ENGINE ---
   function render(g){
-    if(g.status === "playing" && document.getElementById("gameOverModal").style.display === "flex"){
-        document.getElementById("gameOverModal").style.display = "none";
+    document.getElementById("targetDisplay").innerText = g.targetScore;
+
+    // Scoreboard
+    let scoreHtml = "";
+    Object.keys(g.players).forEach(pid => {
+        scoreHtml += `<div class="score-item">${g.players[pid].name}: <b>${g.scores[pid] || 0}</b></div>`;
+    });
+    document.getElementById("scoreboard").innerHTML = scoreHtml;
+
+    // Auto Restart Check
+    if(g.status === "playing" && document.getElementById("winnerModal").style.display === "flex"){
+        document.getElementById("winnerModal").style.display = "none";
         if(g.players[myId].tiles.length === 0) setTimeout(()=>drawTiles(7), 500);
     }
 
-    if(g.status === "finished") {
-        document.getElementById("gameOverModal").style.display = "flex";
-        document.getElementById("winnerName").innerText = g.players[g.winner]?.name || "Unknown";
-        if(myId === "p1" || myId === g.winner){
-             document.getElementById("restartBtn").style.display = "inline-block";
-             document.getElementById("waitHostMsg").style.display = "none";
+    // WIN MODAL
+    if(g.status === "round_finished" || g.status === "match_finished") {
+        if(document.getElementById("winnerModal").style.display !== "flex") playSound('win');
+        
+        let modal = document.getElementById("winnerModal");
+        modal.style.display = "flex";
+        
+        let wName = g.players[g.winner]?.name || "Unknown";
+        let earned = g.lastPoints || 0;
+
+        if(g.status === "match_finished"){
+            document.getElementById("winTitle").innerText = "🏆 MATCH WINNER! 🏆";
+            document.getElementById("winnerName").innerText = wName;
+            document.getElementById("winPoints").innerText = "REACHED TARGET SCORE!";
+            document.getElementById("nextRoundBtn").style.display = "none";
+            document.getElementById("mainMenuBtn").style.display = "inline-block";
+            document.getElementById("waitMsg").style.display = "none";
         } else {
-             document.getElementById("restartBtn").style.display = "none";
-             document.getElementById("waitHostMsg").style.display = "block";
+            document.getElementById("winTitle").innerText = "ROUND WINNER";
+            document.getElementById("winnerName").innerText = wName;
+            document.getElementById("winPoints").innerText = "+" + earned + " Points";
+            
+            if(myId === "p1"){
+                document.getElementById("nextRoundBtn").style.display = "inline-block";
+                document.getElementById("waitMsg").style.display = "none";
+            } else {
+                document.getElementById("nextRoundBtn").style.display = "none";
+                document.getElementById("waitMsg").style.display = "block";
+            }
+            document.getElementById("mainMenuBtn").style.display = "none";
         }
         return;
     }
 
+    // Turn Logic & Sound
     let isTurn = (g.turn === myId);
+    if(isTurn && lastTurnState !== myId) {
+        playSound('turn');
+        vibrate();
+        lastTurnState = myId;
+    } else if(!isTurn) {
+        lastTurnState = null;
+    }
+
     let hasMove = canPlayAny(g);
     document.getElementById("drawBtnContainer").style.display = (isTurn && !hasMove && g.tiles.length > 0) ? "block" : "none";
     document.getElementById("turnMsg").innerHTML = isTurn ? (hasMove ? `<span style="color:#4ade80">🟢 YOUR TURN</span>` : `<span style="color:#ff9800">⚠️ No moves! Draw card.</span>`) : `<span style="color:#aaa">Waiting for ${g.players[g.turn].name}...</span>`;
 
-    let bDiv = document.getElementById("boardScroll");
+    // Render Board
+    lelet bDiv = document.getElementById("boardScroll");
     bDiv.innerHTML = "";
     g.board.forEach(t => {
       let isDouble = (t.a === t.b);
@@ -373,6 +456,7 @@
       return g.players[myId].tiles.some(t => t.a===h || t.b===h || t.a===tl || t.b===tl);
   }
 
+  // --- ACTIONS ---
   window.openBoneyard = () => {
       let grid = document.getElementById("boneyardGrid");
       grid.innerHTML = "";
@@ -387,7 +471,9 @@
   window.closeBoneyard = () => document.getElementById("boneyardModal").style.display="none";
   window.confirmDraw = async () => { closeBoneyard(); await drawTiles(1); };
 
+  // --- PLAY & SCORE LOGIC ---
   window.playTile = async (idx) => {
+    playSound('click'); // Sound
     const ref = doc(db,"rooms",roomId);
     const s = await getDoc(ref);
     let g = s.data();
@@ -405,8 +491,21 @@
     if(!played) return;
     g.players[myId].tiles.splice(idx,1);
 
+    // WIN LOGIC (SCORING)
     if(g.players[myId].tiles.length === 0) {
-        await updateDoc(ref, { board: g.board, players: g.players, status: "finished", winner: myId });
+        let roundPoints = 0;
+        Object.keys(g.players).forEach(pid => {
+            if(pid !== myId){
+                g.players[pid].tiles.forEach(tile => roundPoints += (tile.a + tile.b));
+            }
+        });
+        g.scores[myId] += roundPoints;
+        let matchOver = g.scores[myId] >= g.targetScore;
+        await updateDoc(ref, { 
+            board: g.board, players: g.players, scores: g.scores,
+            status: matchOver ? "match_finished" : "round_finished",
+            winner: myId, lastPoints: roundPoints
+        });
     } else {
         let ids = Object.keys(g.players).sort();
         let next = ids[(ids.indexOf(myId)+1)%ids.length];
@@ -414,17 +513,22 @@
     }
   };
 
-  window.resetGame = async () => {
+  // --- NEXT ROUND ---
+  window.nextRound = async () => {
       const ref = doc(db,"rooms",roomId);
       const s = await getDoc(ref);
-      let g = s.data();let newTiles = generateTiles();
+      let g = s.data();
+      
+      let newTiles = generateTiles();
       Object.keys(g.players).forEach(pid => g.players[pid].tiles = []);
+      
       await updateDoc(ref, {
           board: [], tiles: newTiles, status: "playing",
-          players: g.players, winner: null, turn: g.winner
+          players: g.players, winner: null, turn: g.winner // Winner starts next
       });
   };
 
+  // --- CHAT ---
   window.toggleChat = () => { let b = document.getElementById("chatBox"); b.style.display = b.style.display==="flex"?"none":"flex"; };
   window.sendChat = async () => {
       let inp = document.getElementById("chatInp"); if(!inp.value) return;
@@ -437,7 +541,7 @@
       div.scrollTop = div.scrollHeight;
   }
 
-  // --- VIDEO CALL LOGIC ---
+  // --- VIDEO CALL (HD) ---
   let jitsiApi = null;
   window.toggleVideo = () => {
       let box = document.getElementById("videoContainer");
@@ -453,18 +557,15 @@
   function startJitsi(){
       const domain = 'meet.jit.si';
       const options = {
-          roomName: 'DominoRoom_' + roomId,
+          roomName: 'DominoPro_' + roomId,
           width: '100%', height: '100%',
           parentNode: document.querySelector('#jitsiFrame'),
           userInfo: { displayName: myName },
-          interfaceConfigOverwrite: { 
-              TOOLBAR_BUTTONS: ['microphone', 'camera', 'hangup'],
-              SHOW_JITSI_WATERMARK: false 
-          }
+          configOverwrite: { startWithVideoMuted: false, resolution: 720 },
+          interfaceConfigOverwrite: { TOOLBAR_BUTTONS: ['microphone', 'camera', 'hangup'], SHOW_JITSI_WATERMARK: false, filmStripOnly: false }
       };
       jitsiApi = new JitsiMeetExternalAPI(domain, options);
   }
-
 </script>
 </body>
 </html>
