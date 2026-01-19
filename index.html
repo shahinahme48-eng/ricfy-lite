@@ -11,137 +11,108 @@
     /* --- BASIC --- */
     body { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; user-select: none; }
 
-    /* --- THE TABLE (Green Felt) --- */
+    /* --- THE TABLE (Deep Green Felt with Wood) --- */
     #table {
       width: 100vw; height: 100vh;
-      background: radial-gradient(circle, #2e7d32 0%, #1b5e20 100%);
+      background: radial-gradient(circle, #1e6028 0%, #0d2e11 100%);
       position: relative;
       display: flex; flex-direction: column; justify-content: space-between;
+      box-shadow: inset 0 0 150px rgba(0,0,0,0.9);
     }
     #table::before {
       content: ""; position: absolute; top:0; left:0; right:0; bottom:0;
-      border: 15px solid #3e2723; /* Wood Border */
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+      border: 15px solid #5d4037;
+      border-image: linear-gradient(to bottom right, #6d4c41, #3e2723) 1;
       pointer-events: none; z-index: 10;
     }
 
-    /* --- TOP BAR --- */
-    .top-bar {
-      position: absolute; top: 20px; left: 20px; z-index: 20;
-      display: flex; gap: 10px;
-    }
-    .badge {
-      background: rgba(0,0,0,0.6); color: gold; 
-      padding: 5px 15px; border-radius: 20px; font-weight: bold; border: 1px solid gold;
-    }
-
-    /* --- PLAYER AVATARS (Top) --- */
-    .opponents {
-      display: flex; justify-content: center; gap: 20px; padding-top: 25px; z-index: 15;
-    }
-    .avatar {
-      width: 60px; height: 60px; border-radius: 50%;
-      background: #444; border: 3px solid #ccc;
-      position: relative; display: flex; justify-content: center; align-items: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    }
-    .avatar img { width: 100%; height: 100%; border-radius: 50%; }
-    .card-count {
-      position: absolute; bottom: -5px; right: -5px;
-      background: red; color: white; width: 24px; height: 24px;
-      border-radius: 50%; font-size: 12px; font-weight: bold;
-      display: flex; justify-content: center; align-items: center; border: 2px solid white;
-    }
-    .active-player { border-color: gold; box-shadow: 0 0 15px gold; }
-
-    /* --- BOARD AREA --- */
+    /* --- BOARD AREA (Auto Scaling) --- */
     #boardArea {
       flex: 1; display: flex; align-items: center; justify-content: center;
-      overflow: auto; position: relative;
+      overflow: hidden; position: relative; width: 100%;
     }
     #boardScroll {
-      display: flex; align-items: center; padding: 50px; min-width: 100%;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
+      padding: 50px;
+      transition: transform 0.3s ease;
     }
 
-    /* --- TILE STYLING (Realistic) --- */
+    /* --- 3D REALISTIC TILES --- */
     .tile {
-      background: #f4f1ea; /* Bone color */
-      border-radius: 4px;
-      box-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+      background: linear-gradient(135deg, #fffbf0 0%, #e6dfcc 100%);
+      border-radius: 6px;
+      box-shadow: 1px 1px 0px #bdae88, 2px 2px 0px #bdae88, 3px 3px 0px #bdae88, 4px 4px 10px rgba(0,0,0,0.6);
       position: relative;
-      display: flex;cursor: pointer;
+      display: flex;
+      cursor: pointer;
       box-sizing: border-box;
-      border: 1px solid #999;
+      border: 1px solid #d4c5a9;
+      margin: 2px;
+    }
+    .tile::after {
+      content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 50%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.7), transparent);
+      border-radius: 6px 6px 0 0; pointer-events: none;
     }
     
-    /* Horizontal (Normal) */
-    .tile-h { width: 70px; height: 35px; flex-direction: row; }
-    /* Vertical (Double) */
-    .tile-v { width: 35px; height: 70px; flex-direction: column; }
+    .tile-h { width: 74px; height: 37px; flex-direction: row; }
+    .tile-v { width: 37px; height: 74px; flex-direction: column; }
 
-    .line-h { width: 1px; height: 100%; background: #bdc3c7; }
-    .line-v { width: 100%; height: 1px; background: #bdc3c7; }
+    .line-h { width: 2px; height: 100%; background: linear-gradient(to bottom, transparent, #bdae88, transparent); }
+    .line-v { width: 100%; height: 2px; background: linear-gradient(to right, transparent, #bdae88, transparent); }
 
-    /* Pips (Dots) */
+    /* --- ENGRAVED PIPS --- */
     .pips {
       flex: 1; display: grid; 
       grid-template-columns: repeat(3, 1fr); 
       grid-template-rows: repeat(3, 1fr);
-      padding: 3px;
+      padding: 4px;
     }
     .dot {
-      width: 6px; height: 6px; background: #000; border-radius: 50%;
-      margin: auto; box-shadow: inset 1px 1px 1px rgba(255,255,255,0.8);
+      width: 7px; height: 7px; 
+      background: radial-gradient(circle, #1a1a1a, #000);
+      border-radius: 50%; margin: auto; 
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.8), 0 1px 0 rgba(255,255,255,0.3);
     }
 
-    /* --- MY HAND (Bottom) --- */
+    /* --- MY HAND --- */
     .my-area {
-      background: rgba(0,0,0,0.5);
-      border-top: 5px solid #3e2723;
-      padding: 10px; display: flex; flex-direction: column; align-items: center;
-      z-index: 20;
+      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+      padding: 10px; display: flex; flex-direction: column; align-items: center; z-index: 20;
     }
     .my-hand {
-      display: flex; gap: 8px; overflow-x: auto; padding: 10px; max-width: 100%;
+      display: flex; gap: 10px; overflow-x: auto; padding: 15px; max-width: 100%;
     }
     .hand-tile {
-      width: 38px; height: 76px; background: #fff;
+      width: 40px; height: 80px; 
+      background: linear-gradient(135deg, #fffbf0 0%, #e6dfcc 100%);
       display: flex; flex-direction: column;
-      border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.5);
-      transition: transform 0.2s;
+      border-radius: 6px; 
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+      transition: transform 0.2s; border: 1px solid #d4c5a9;
     }
-    .hand-tile:hover { transform: translateY(-15px); }
+    .hand-tile:active { transform: scale(0.9); }
+    
+    /* --- OTHER UI --- */
+    .top-bar { position: absolute; top: 20px; left: 20px; z-index: 20; display: flex; gap: 10px; }
+    .badge { background: rgba(0,0,0,0.6); color: gold; padding: 5px 15px; border-radius: 20px; font-weight: bold; border: 1px solid gold; box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+    
+    .opponents { display: flex; justify-content: center; gap: 20px; padding-top: 25px; z-index: 15; }
+    .avatar { width: 50px; height: 50px; border-radius: 50%; background: #444; border: 2px solid #ccc; position: relative; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+    .avatar img { width: 100%; height: 100%; border-radius: 50%; }
+    .card-count { position: absolute; bottom: -5px; right: -5px; background: red; color: white; width: 20px; height: 20px; border-radius: 50%; font-size: 10px; font-weight: bold; display: flex; justify-content: center; align-items: center; border: 2px solid white; }
+    .active-player { border-color: gold; box-shadow: 0 0 20px gold; animation: pulse 1.5s infinite; }
+    
+    @keyframes pulse { 0% { box-shadow: 0 0 10px gold; } 50% { box-shadow: 0 0 25px gold; } 100% { box-shadow: 0 0 10px gold; } }
 
-    /* --- BONEYARD MODAL (Like Screenshot) --- */
-    #boneyardModal {
-      display: none;
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8); z-index: 1000;
-      flex-direction: column; justify-content: center; align-items: center;
-    }
-    .boneyard-grid {
-      display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
-      max-width: 80%;
-    }
-    .facedown-tile {
-      width: 40px; height: 70px;
-      background: linear-gradient(135deg, #e0c39a 0%, #5d4037 100%);
-      border: 2px solid #fff; border-radius: 4px;
-      cursor: pointer;
-    }
-    .facedown-tile:active { transform: scale(0.9); }
-
-    /* --- LOGIN SCREEN --- */
-    #login {
-      position: absolute; top:0; left:0; width:100%; height:100%;
-      background: radial-gradient(circle, #2c3e50 0%, #000 100%);
-      z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white;
-    }
+    #boneyardModal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
+    .boneyard-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 80%; }
+    .facedown-tile { width: 40px; height: 70px; background: linear-gradient(135deg, #bdae88 0%, #5d4037 100%); border: 2px solid #fff; border-radius: 4px; cursor: pointer; box-shadow: 0 5px 15px black; }
+    
+    #login { position: absolute; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle, #2c3e50 0%, #000 100%); z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
     input { padding: 12px; margin: 10px; border-radius: 5px; border: none; text-align: center; font-size: 16px; }
     .btn { padding: 12px 30px; margin: 5px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; }
     .btn-gold { background: linear-gradient(to bottom, #ffd700, #ff8c00); color: black; }
-    
   </style>
 </head>
 <body>
@@ -164,12 +135,10 @@
   </div>
 </div>
 
-<!-- === BONEYARD POPUP (Draw Tiles) === -->
+<!-- === BONEYARD POPUP === -->
 <div id="boneyardModal">
   <h2 style="color:white; margin-bottom:20px;">Draw a Domino</h2>
-  <div class="boneyard-grid" id="boneyardGrid">
-    <!-- Face down tiles will be injected here -->
-  </div>
+  <div class="boneyard-grid" id="boneyardGrid"></div>
   <button onclick="closeBoneyard()" style="margin-top:30px; padding:10px 20px; background:red; color:white; border:none; border-radius:5px; cursor:pointer;">Cancel</button>
 </div>
 
@@ -204,8 +173,8 @@
 
 <!-- FIREBASE & LOGIC -->
 <script type="module">
-  // 🟢 CONFIGURATION - আপনার হোয়াটসঅ্যাপ নাম্বার এখানে দিন
-  const ADMIN_WHATSAPP = "971566932862"; 
+  // 🟢 CONFIGURATION
+  const ADMIN_WHATSAPP = "971566932862";
 
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
   import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
@@ -345,27 +314,42 @@
        }
     });
 
-    // Update Boneyard Count in Modal
+    // Update Boneyard Count
     window.remainingTiles = g.tiles.length;
-  }
 
-  // --- BONEYARD LOGIC (Like Screenshot) ---
+    // 6. AUTO ZOOM / FIT BOARD
+    setTimeout(() => {
+        let boardScroll = document.getElementById("boardScroll");
+        let boardArea = document.getElementById("boardArea");
+        
+        let contentWidth = boardScroll.scrollWidth;
+        let containerWidth = boardArea.clientWidth;
+        
+        if (contentWidth > containerWidth) {
+            let scale = containerWidth / (contentWidth + 50); 
+            scale = Math.max(scale, 0.4); 
+            boardScroll.style.transform = `scale(${scale})`;
+        } else {
+            boardScroll.style.transform = `scale(1)`;
+        }
+    }, 100);
+
+  } // <-- End of render()
+
+  // --- BONEYARD LOGIC ---
   window.openBoneyard = () => {
     let modal = document.getElementById("boneyardModal");
     let grid = document.getElementById("boneyardGrid");
     grid.innerHTML = "";
     
-    // Generate facedown tiles visually
     let count = window.remainingTiles || 0;
     if(count === 0) return alert("Boneyard Empty");
-
-    // Limit visual tiles to max 14 for UI neatness
     let visualCount = Math.min(count, 14); 
     
     for(let i=0; i<visualCount; i++){
         let div = document.createElement("div");
         div.className = "facedown-tile";
-        div.onclick = () => confirmDraw(); // Click any to draw
+        div.onclick = () => confirmDraw();
         grid.appendChild(div);
     }
     modal.style.display = "flex";
@@ -377,7 +361,7 @@
 
   window.confirmDraw = async () => {
     closeBoneyard();
-    await drawTiles(1); // Draw 1 real tile
+    await drawTiles(1);
   };
 
   // --- PLAY LOGIC ---
