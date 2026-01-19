@@ -4,28 +4,74 @@
   <meta charset="UTF-8">
   <title>Online Domino 4 Player</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+  
+  <style>
+    /* CSS STYLE */
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body { margin: 0; background: #0f172a; color: white; text-align: center; }
+    header { padding: 15px; background: #1e293b; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+    .container { max-width: 800px; margin: 0 auto; padding-bottom: 50px; }
+    
+    .controls { padding: 20px; background: #1e293b; margin: 10px; border-radius: 8px; }
+    input { padding: 8px; margin: 5px; border-radius: 4px; border: 1px solid #475569; background: #334155; color: white; width: 70%; }
+    button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #3b82f6; color: white; border: none; border-radius: 4px; font-weight: bold; }
+    button:hover { background: #2563eb; }
+    
+    /* Board Styling */
+    #boardContainer { 
+      overflow-x: auto; background: #052e16; padding: 20px; 
+      margin: 10px; border-radius: 10px; border: 4px solid #553e28; min-height: 120px; 
+      display: flex; align-items: center;
+    }
+    #board { display: flex; align-items: center; gap: 4px; margin: 0 auto; width: max-content; }
+    
+    /* Tile Styling */
+    .tile { 
+      background: #f8fafc; color: black; width: 36px; height: 64px; 
+      display: flex; flex-direction: column; justify-content: center; align-items: center; 
+      border-radius: 4px; font-weight: bold; font-size: 16px; cursor: pointer; 
+      border: 1px solid #94a3b8; box-shadow: 1px 1px 3px rgba(0,0,0,0.5); user-select: none; line-height: 0.8;
+    }
+    .tile:hover { transform: translateY(-3px); background: #e2e8f0; }
+
+    .players { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
+    .hand { min-height: 80px; background: #1e293b; border: 1px dashed #475569; padding: 10px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; border-radius: 6px; }
+    .active-turn { border: 2px solid #22c55e !important; box-shadow: 0 0 10px #22c55e; }
+    
+    #status { font-weight: bold; color: #facc15; }
+    #drawBtn { width: 90%; background: #f59e0b; color: black; margin-top: 15px; }
+    
+    /* Chat */
+    #chatBox { height: 150px; overflow-y: auto; background: #1e293b; margin: 10px; padding: 10px; text-align: left; border-radius: 6px; font-size: 14px; border: 1px solid #334155; }
+    .chat-controls { display: flex; gap: 5px; padding: 10px; }
+    
+    /* Error Log Box (For Debugging) */
+    #errorLog { display: none; color: red; background: #fee2e2; padding: 10px; margin: 10px; border-radius: 5px; text-align: left; font-size: 12px; }
+  </style>
 </head>
 <body>
 
 <header>
-  <h1>🎴 Online Domino</h1>
-  <div id="status">Status: Not Connected</div>
+  <h3>🎴 Domino Online</h3>
+  <div id="status">Loading System...</div>
 </header>
+
+<div id="errorLog"></div>
 
 <div class="container">
   <div class="controls">
-    <input id="playerName" placeholder="Your Name">
-    <button onclick="createRoom()">Create Room</button>
-    <br><br>
-    <input id="roomCode" placeholder="Room Code">
-    <button onclick="joinRoom()">Join Room</button>
+    <input id="playerName" placeholder="Enter Your Name">
+    <br>
+    <button id="btnCreate">Create Room</button>
+    <br><hr style="border-color:#334155"><br>
+    <input id="roomCodeInput" placeholder="Enter Room Code">
+    <br>
+    <button id="btnJoin">Join Room</button>
   </div>
 
-  <h3>Board</h3>
-  <!-- বোর্ড এরিয়া -->
+  <h3>Game Board</h3>
   <div id="boardContainer">
-    <div id="board"></div>
+    <div id="board"><span style="color:#94a3b8">Board is empty</span></div>
   </div>
 
   <div class="players">
@@ -47,16 +93,257 @@
     </div>
   </div>
 
-  <button id="drawBtn" onclick="drawTile()">🎲 Draw Tile from Boneyard</button>
+  <button id="drawBtn">🎲 Draw Tile</button>
 
-  <h3>Chat</h3>
+  <h3>Chat Room</h3>
   <div id="chatBox"></div>
-  <div style="display:flex; gap:5px; padding:10px;">
+  <div class="chat-controls">
     <input id="chatInput" placeholder="Type message..." style="flex:1;">
-    <button onclick="sendChat()">Send</button>
+    <button id="btnSend">Send</button>
   </div>
 </div>
 
-<script type="module" src="script.js"></script>
+<!-- JAVASCRIPT LOGIC -->
+<script type="module">
+  // Error Logger for Mobile
+  window.onerror = function(message, source, lineno, colno, error) {
+    const log = document.getElementById('errorLog');
+    log.style.display = 'block';
+    log.innerHTML += `ERROR: ${message} <br>`;
+  };
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+  import {
+    getFirestore, doc, setDoc, updateDoc, getDoc,
+    onSnapshot, collection, addDoc, serverTimestamp, query, orderBy
+  } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAXXWgGt8WbMzmgn2ukdB4qtP5xwr2jz5E",
+    authDomain: "studio-343961532-65f17.firebaseapp.com",
+    projectId: "studio-343961532-65f17",
+    storageBucket: "studio-343961532-65f17.firebasestorage.app",
+    messagingSenderId: "667987171288",
+    appId: "1:667987171288:web:ffadb2286957b28b4b84ad"
+  };
+
+  let app, auth, db;
+  let roomId = null;
+  let myPlayerId = null;
+  let myName = "";
+  let unsubscribeChat = null;
+
+  try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    
+    document.getElementById("status").innerText = "System Ready. Please Login/Join.";
+
+    signInAnonymously(auth).then(() => {
+      console.log("Logged in anonymously");
+      document.getElementById("status").innerText = "Server Connected! Ready to Play.";
+    }).catch((error) => {
+      document.getElementById("status").innerText = "Auth Failed: " + error.message;
+    });
+
+  } catch (e) {
+    document.getElementById("status").innerText = "Firebase Error: " + e.message;
+  }
+
+  // --- GAME FUNCTIONS ---
+
+  function generateTiles(){
+    let t=[];
+    for(let i=0;i<=6;i++){
+      for(let j=i;j<=6;j++){
+        t.push([i,j]);
+      }
+    }
+    return t.sort(()=>Math.random()-0.5);
+  }
+
+  // Create Room
+  document.getElementById("btnCreate").addEventListener("click", async () => {
+    try {
+      myName = document.getElementById("playerName").value || "Host";
+      roomId = Math.random().toString(36).substring(2,8).toUpperCase();
+      
+      let tiles = generateTiles();
+      let p1Tiles = tiles.splice(0,7);
+      
+      let players = {
+        p1: { name: myName, tiles: p1Tiles }
+      };
+
+      await setDoc(doc(db,"rooms",roomId), {
+        board: [], tiles: tiles, players: players, turn: "p1", status: "waiting"
+      });
+
+      myPlayerId = "p1";
+      alert("Room Created! Code: " + roomId);
+      listenRoom();
+    } catch(err) {
+      alert("Error Creating Room: " + err.message);
+    }
+  });
+
+  // Join Room
+  document.getElementById("btnJoin").addEventListener("click", async () => {
+    try {
+      myName = document.getElementById("playerName").value || "Guest";
+      roomId = document.getElementById("roomCodeInput").value.toUpperCase().trim();
+      
+      if(!roomId) { alert("Please enter room code"); return; }
+
+      const ref = doc(db,"rooms",roomId);
+      const snap = await getDoc(ref);
+      
+      if(!snap.exists()){ alert("Room not found!"); return; }
+
+      let data = snap.data();
+      let count = Object.keys(data.players).length;
+      if(count >= 4){ alert("Room Full!"); return; }
+
+      myPlayerId = "p" + (count + 1);
+      let newHand = data.tiles.splice(0,7);
+      
+      data.players[myPlayerId] = { name: myName, tiles: newHand };
+
+      await updateDoc(ref, { players: data.players, tiles: data.tiles });
+      listenRoom();
+    } catch(err) {
+      alert("Error Joining: " + err.message);
+    }
+  });
+
+  function listenRoom(){
+    onSnapshot(doc(db,"rooms",roomId), (snap) => {
+      if(snap.exists()) {
+        render(snap.data());
+        listenChat();
+      }
+    });
+  }
+
+  function render(g){
+    // Status
+    let turnName = g.players[g.turn] ? g.players[g.turn].name : g.turn;
+    document.getElementById("status").innerHTML = 
+      `Room: ${roomId} | You: ${myPlayerId} | <span style="color:#4ade80">Turn: ${turnName}</span>`;
+
+    // Board
+    const boardEl = document.getElementById("board");
+    boardEl.innerHTML = "";
+    if(g.board.length === 0) boardEl.innerHTML = "<span style='color:gray'>Empty Board</span>";
+    
+    g.board.forEach(t => {
+      boardEl.innerHTML += `<div class="tile" style="background:white;cursor:default;"><div>${t[0]}</div><div style="height:1px;width:20px;background:#000;margin:2px 0;"></div><div>${t[1]}</div></div>`;
+    });
+
+    // Players
+    for(let i=1; i<=4; i++){
+      let pid = "p"+i;
+      let div = document.getElementById(pid);
+      let nameEl = document.getElementById("name-"+pid);
+      
+      if(g.players[pid]){
+        nameEl.innerText = g.players[pid].name;
+        // Turn Highlight
+        if(g.turn === pid) div.parentElement.style.border = "2px solid #22c55e";
+        else div.parentElement.style.border = "none";
+
+        div.innerHTML = g.players[pid].tiles.map((t,idx) => {
+          if(pid === myPlayerId){
+             // My Tiles
+             let canPlay = (g.turn === myPlayerId);
+             return `<div class="tile" onclick="window.playTile(${idx})" style="background:${canPlay?'#fff':'#ccc'}">
+                <div>${t[0]}</div><div style="height:1px;width:20px;background:#000;margin:2px 0;"></div><div>${t[1]}</div>
+             </div>`;
+          } else {
+             // Enemy Tiles
+             return `<div class="tile" style="background:#64748b;color:#64748b">?</div>`; 
+          }
+        }).join("");
+      } else {
+        div.innerHTML = "<small>Waiting...</small>";
+      }
+    }
+  }
+
+  // Make playTile global so HTML can see it
+  window.playTile = async function(index){
+    const ref = doc(db,"rooms",roomId);
+    const snap = await getDoc(ref);
+    const g = snap.data();
+
+    if(g.turn !== myPlayerId) { alert("Not your turn!"); return; }
+
+    let tile = g.players[myPlayerId].tiles[index];
+    let played = false;
+
+    if(g.board.length === 0){
+      g.board.push(tile);
+      played = true;
+    } else {
+      let head = g.board[0];
+      let tail = g.board[g.board.length-1];
+      let t1 = tile[0], t2 = tile[1];
+
+      // Logic: Right then Left
+      if(tail[1]===t1) { g.board.push([t1,t2]); played=true; }
+      else if(tail[1]===t2) { g.board.push([t2,t1]); played=true; }
+      else if(head[0]===t2) { g.board.unshift([t1,t2]); played=true; }
+      else if(head[0]===t1) { g.board.unshift([t2,t1]); played=true; }
+    }
+
+    if(!played) { alert("Invalid Move!"); return; }
+
+    g.players[myPlayerId].tiles.splice(index,1);
+    
+    // Next Turn
+    let total = Object.keys(g.players).length;
+    let curr = parseInt(myPlayerId.substring(1));
+    let next = curr + 1;
+    if(next > total) next = 1;
+    
+    await updateDoc(ref, { board: g.board, players: g.players, turn: "p"+next });
+  };
+
+  // Draw Tile
+  document.getElementById("drawBtn").addEventListener("click", async () => {
+    if(!roomId) return;
+    const ref = doc(db,"rooms",roomId);
+    const snap = await getDoc(ref);
+    const g = snap.data();
+    if(g.turn !== myPlayerId) { alert("Wait for turn!"); return; }
+    if(!g.tiles.length) { alert("Boneyard empty!"); return; }
+
+    g.players[myPlayerId].tiles.push(g.tiles.pop());
+    await updateDoc(ref, { players: g.players, tiles: g.tiles });
+  });
+
+  // Chat
+  function listenChat(){
+    if(unsubscribeChat) return;
+    const q = query(collection(db,"rooms",roomId,"chat"), orderBy("timestamp"));
+    unsubscribeChat = onSnapshot(q, (snap) => {
+      document.getElementById("chatBox").innerHTML = snap.docs.map(d=>
+        `<div><b>${d.data().sender}:</b> ${d.data().message}</div>`
+      ).join("");
+    });
+  }
+
+  document.getElementById("btnSend").addEventListener("click", async () => {
+    let msg = document.getElementById("chatInput").value;
+    if(!msg || !roomId) return;
+    await addDoc(collection(db,"rooms",roomId,"chat"), {
+      sender: myName, message: msg, timestamp: serverTimestamp()
+    });
+    document.getElementById("chatInput").value = "";
+  });
+
+</script>
 </body>
 </html>
