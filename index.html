@@ -393,7 +393,7 @@
 
     let hasMove = canPlayAny(g);
     document.getElementById("drawBtnContainer").style.display = (isTurn && !hasMove && g.tiles.length > 0) ? "block" : "none";
-    document.getElementById("turnMsg").innerHTML = isTurn ? (hasMove ? `<span style="color:#4ade80">🟢YOUR TURN</span>` : `<span style="color:#ff9800">⚠️ No moves! Draw card.</span>`) : `<span style="color:#aaa">Waiting for ${g.players[g.turn]?.name}...</span>`;
+    document.getElementById("turnMsg").innerHTML = isTurn ? (hasMove ? `<span style="color:#4ade80">🟢 YOUR TURN</span>` : `<span style="color:#ff9800">⚠️ No moves! Draw card.</span>`) : `<span style="color:#aaa">Waiting for ${g.players[g.turn]?.name}...</span>`;
 
     let bDiv = document.getElementById("boardScroll");
     bDiv.innerHTML = "";
