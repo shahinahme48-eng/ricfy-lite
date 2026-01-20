@@ -5,7 +5,6 @@
   <title>Domino Pro Ultimate</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src='https://meet.jit.si/external_api.js'></script>
   
   <style>
     /* --- CORE STYLES --- */
@@ -93,11 +92,11 @@
     .draw-btn-pulse { background: linear-gradient(to bottom, #ff9800, #e65100); color: white; padding: 10px 25px; border-radius: 30px; border: 2px solid white; animation: pulseBtn 0.8s infinite alternate; cursor:pointer; font-weight:bold; font-size: 14px; box-shadow: 0 0 20px #ff9800;}
     @keyframes pulseBtn { from { transform: scale(1); } to { transform: scale(1.1); } }
 
-    /* VIDEO CALL (SUPER FIXED) */
-    #videoContainer { display: none; position: absolute; top: 100px; right: 10px; width: 180px; height: 250px; background: #222; border: 2px solid gold; border-radius: 10px; z-index: 80; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
+    /* MIRO-TALK VIDEO CALL (NEW & WORKING) */
+    #videoContainer { display: none; position: absolute; top: 100px; right: 10px; width: 180px; height: 250px; background: #000; border: 2px solid gold; border-radius: 10px; z-index: 80; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
     #videoToggleBtn { position: absolute; top: 15px; right: 10px; z-index: 90; background: #e11d48; color: white; border: none; padding: 8px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 5px; }
     #closeVideo { position: absolute; top: 5px; right: 5px; background: red; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; z-index: 100; font-size: 14px; font-weight: bold; }
-    #backupVideoBtn { display:block; width:100%; padding:10px; background:#3b82f6; color:white; border:none; margin-top:5px; cursor:pointer; font-size:12px; }
+    iframe { border: none; width: 100%; height: 100%; }
 
     /* CHAT */
     #chatIcon { position: absolute; bottom: 130px; right: 20px; z-index: 50; width: 50px; height: 50px; background: #3b82f6; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 24px; box-shadow: 0 0 15px #3b82f6; cursor: pointer; }
@@ -183,13 +182,11 @@
   <!-- SCOREBOARD -->
   <div class="scoreboard" id="scoreboard"></div>
 
-  <!-- VIDEO CALL -->
-  <button id="videoToggleBtn" onclick="toggleVideo()">🎥 Video</button>
+  <!-- VIDEO CALL (MiroTalk) -->
+  <button id="videoToggleBtn" onclick="toggleVideo()">🎥 Live Video</button>
   <div id="videoContainer">
       <button id="closeVideo" onclick="toggleVideo()">X</button>
-      <div id="jitsiFrame" style="width:100%; height:85%;"></div>
-      <!-- BACKUP BUTTON -->
-      <button id="backupVideoBtn" onclick="openExternalVideo()">🔗 Open External Video</button>
+      <iframe id="videoFrame" allow="camera; microphone; display-capture; autoplay" src=""></iframe>
   </div>
 
   <div class="opponents" id="opponents"></div>
@@ -378,13 +375,13 @@
 
     let hasMove = canPlayAny(g);
     document.getElementById("drawBtnContainer").style.display = (isTurn && !hasMove && g.tiles.length > 0) ? "block" : "none";
-    document.getElementById("turnMsg").innerHTisTurn ? (hasMove ? `<span style="color:#4ade80">🟢 YOUR TURN</span>` : `<span style="color:#ff9800">⚠️ No moves! Draw card.</span>`) : `<span style="color:#aaa">Waiting for ${g.players[g.turn]?.name}...</span>`;
+    document.getElementById("turnMsg").innerHTML = isTurn ? (hasMove ? `<span style="color:#4ade80">🟢 YOUR TURN</span>` : `<span style="color:#ff9800">⚠️ No moves! Draw card.</span>`) : `<span style="color:#aaa">Waiting for ${g.players[g.turn]?.name}...</span>`;
 
     let bDiv = document.getElementById("boardScroll");
     bDiv.innerHTML = "";
     g.board.forEach(t => {
       let isDouble = (t.a === t.b);
-      bDiv.innerHTML += `<div class="tile ${isDouble?'tile-v':'tile-h'}">${getPips(t.a)}<div class="${isDouble?'line-v':'line-h'}"></div>${getPips(t.b)}</div>`;
+      bDiv.innerHTML += `<div class="tile ${isDouble?'line-v':'line-h'}"></div>${getPips(t.b)}</div>`;
     });
 
     let hDiv = document.getElementById("myHand");
@@ -497,6 +494,7 @@
       });
   };
 
+  // --- CHAT SYSTEM ---
   window.toggleChat = () => { let b = document.getElementById("chatBox"); b.style.display = b.style.display==="flex"?"none":"flex"; };
   window.sendChat = async () => {
       let inp = document.getElementById("chatInp"); if(!inp.value) return;
@@ -509,43 +507,19 @@
       div.scrollTop = div.scrollHeight;
   }
 
-  // --- VIDEO CALL (FORCED MODE) ---
-  let jitsiApi = null;
+  // --- VIDEO CALL (NO APP, P2P) ---
   window.toggleVideo = () => {
       let box = document.getElementById("videoContainer");
+      let frame = document.getElementById("videoFrame");
+      
       if(box.style.display === "block"){
           box.style.display = "none";
-          if(jitsiApi) { jitsiApi.dispose(); jitsiApi = null; }
+          frame.src = "";
       } else {
           box.style.display = "block";
-          if(!jitsiApi) startJitsi();
+          // MiroTalk P2P Link (No Login)
+          frame.src = "https://p2p.mirotalk.com/join/DominoPro_" + roomId;
       }
-  };
-
-  function startJitsi(){
-      const domain = 'meet.jit.si';
-      const options = {
-          roomName: 'DominoPro_' + roomId,
-          width: '100%', height: '100%',
-          parentNode: document.querySelector('#jitsiFrame'),
-          userInfo: { displayName: myName },
-          configOverwrite: { 
-              startWithVideoMuted: false, 
-              prejoinPageEnabled: false, 
-              disableDeepLinking: true 
-          },
-          interfaceConfigOverwrite: { 
-              MOBILE_APP_PROMO: false,
-              TOOLBAR_BUTTONS: ['microphone', 'camera', 'hangup', 'tileview'],
-              SHOW_JITSI_WATERMARK: false
-          }
-      };
-      jitsiApi = new JitsiMeetExternalAPI(domain, options);
-  }
-
-  // Fallback if embed fails
-  window.openExternalVideo = () => {
-      window.open('https://meet.jit.si/DominoPro_' + roomId, '_blank');
   };
 </script>
 </body>
