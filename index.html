@@ -93,16 +93,17 @@
     .draw-btn-pulse { background: linear-gradient(to bottom, #ff9800, #e65100); color: white; padding: 10px 25px; border-radius: 30px; border: 2px solid white; animation: pulseBtn 0.8s infinite alternate; cursor:pointer; font-weight:bold; font-size: 14px; box-shadow: 0 0 20px #ff9800;}
     @keyframes pulseBtn { from { transform: scale(1); } to { transform: scale(1.1); } }
 
-    /* VIDEO CALL (FIXED) */
-    #videoContainer { display: none; position: absolute; top: 100px; right: 10px; width: 160px; height: 220px; background: black; border: 2px solid gold; border-radius: 10px; z-index: 80; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
+    /* VIDEO CALL (SUPER FIXED) */
+    #videoContainer { display: none; position: absolute; top: 100px; right: 10px; width: 180px; height: 250px; background: #222; border: 2px solid gold; border-radius: 10px; z-index: 80; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
     #videoToggleBtn { position: absolute; top: 15px; right: 10px; z-index: 90; background: #e11d48; color: white; border: none; padding: 8px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 5px; }
-    #closeVideo { position: absolute; top: 5px; right: 5px; background: red; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; z-index: 100; font-size: 12px; }
+    #closeVideo { position: absolute; top: 5px; right: 5px; background: red; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; z-index: 100; font-size: 14px; font-weight: bold; }
+    #backupVideoBtn { display:block; width:100%; padding:10px; background:#3b82f6; color:white; border:none; margin-top:5px; cursor:pointer; font-size:12px; }
 
     /* CHAT */
     #chatIcon { position: absolute; bottom: 130px; right: 20px; z-index: 50; width: 50px; height: 50px; background: #3b82f6; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 24px; box-shadow: 0 0 15px #3b82f6; cursor: pointer; }
     #chatBox { display: none; position: absolute; bottom: 190px; right: 20px; width: 250px; height: 300px; background: rgba(0,0,0,0.9); border: 2px solid #333; border-radius: 10px; z-index: 60; flex-direction: column; overflow: hidden; }
     #chatMessages { flex: 1; overflow-y: auto; padding: 10px; font-size: 12px; color: white; display: flex; flex-direction: column; gap: 5px; }
-    .chat-bubble { background: #333; padding: 5px 10px; border-radius: 10px; max-width: 80%; }
+    .chat-bubble { background: #333; padding: 5px 10px; border-radius: 10px; max-width: 80%; word-wrap: break-word; }
     .chat-input-area { display: flex; border-top: 1px solid #333; }
     #chatInp { flex: 1; padding: 10px; border: none; background: #222; color: white; outline: none; }
     #sendBtn { padding: 0 15px; background: #3b82f6; color: white; border: none; cursor: pointer; }
@@ -138,8 +139,6 @@
           <option value="50">Target Score: 50</option>
           <option value="100">Target Score: 100</option>
       </select>
-      
-      <!-- PLAYER SELECT -->
       <select id="playerCount">
           <option value="2">2 Players</option>
           <option value="4">4 Players</option>
@@ -161,7 +160,6 @@
     <h1 id="winnerName" style="color: black; margin: 10px; font-size:32px;">Player Name</h1>
     <p id="winPoints" style="color:black; font-weight:bold;">+0 Points</p>
     <div style="font-size: 40px;">🎉</div>
-    
     <button id="nextRoundBtn" onclick="nextRound()" class="btn" style="background:black; color:white; margin-top:20px; display:none;">Next Round ➡️</button>
     <button id="mainMenuBtn" onclick="location.reload()" class="btn" style="background:red; color:white; margin-top:20px; display:none;">🏆 Main Menu</button>
     <p id="waitMsg" style="font-size:12px; color:black; margin-top:10px;">Waiting for host...</p>
@@ -189,7 +187,9 @@
   <button id="videoToggleBtn" onclick="toggleVideo()">🎥 Video</button>
   <div id="videoContainer">
       <button id="closeVideo" onclick="toggleVideo()">X</button>
-      <div id="jitsiFrame" style="width:100%; height:100%;"></div>
+      <div id="jitsiFrame" style="width:100%; height:85%;"></div>
+      <!-- BACKUP BUTTON -->
+      <button id="backupVideoBtn" onclick="openExternalVideo()">🔗 Open External Video</button>
   </div>
 
   <div class="opponents" id="opponents"></div>
@@ -269,49 +269,35 @@
     myName = document.getElementById("pName").value || "Host";
     let target = parseInt(document.getElementById("targetScore").value);
     let maxP = parseInt(document.getElementById("playerCount").value);
-    
-    try {
-        roomId = Math.random().toString(36).substring(2,6).toUpperCase();
-        myId = "p1";
-        let tiles = generateTiles();
-        
-        await setDoc(doc(db,"rooms",roomId), {
-          board: [], tiles: tiles, turn: "p1", status: "playing",
-          targetScore: target, maxPlayers: maxP, scores: { p1: 0 },
-          players: { p1: { name: myName, tiles: [] } }
-        });
-        
-        setTimeout(()=>drawTiles(7), 800);
-        enterGame();
-    } catch(e) {
-        alert("Error starting game! Check Internet.");
-    }
+    roomId = Math.random().toString(36).substring(2,6).toUpperCase();
+    myId = "p1";
+    let tiles = generateTiles();
+    await setDoc(doc(db,"rooms",roomId), {
+      board: [], tiles: tiles, turn: "p1", status: "playing",
+      targetScore: target, maxPlayers: maxP, scores: { p1: 0 },
+      players: { p1: { name: myName, tiles: [] } },
+      chats: [] // Added for Chat
+    });
+    setTimeout(()=>drawTiles(7), 800);
+    enterGame();
   };
 
   window.joinRoom = async () => {
     myName = document.getElementById("pName").value || "Guest";
     roomId = document.getElementById("code").value.toUpperCase();
+    const ref = doc(db,"rooms",roomId);
+    const snap = await getDoc(ref);
+    if(!snap.exists()) return alert("Invalid Room");
+    let d = snap.data();
+    if(Object.keys(d.players).length >= d.maxPlayers) return alert("Room Full");
     
-    try {
-        const ref = doc(db,"rooms",roomId);
-        const snap = await getDoc(ref);
-        if(!snap.exists()) return alert("Room Not Found!");
-        
-        let d = snap.data();
-        let currentPlayers = Object.keys(d.players).length;
-        
-        if(currentPlayers >= d.maxPlayers) return alert("Room Full (Max " + d.maxPlayers + ")");
-        
-        myId = "p"+(currentPlayers+1);
-        d.players[myId] = { name: myName, tiles: [] };
-        if(!d.scores[myId]) d.scores[myId] = 0;
-        
-        await updateDoc(ref, { players: d.players, scores: d.scores });
-        setTimeout(()=>drawTiles(7), 800);
-        enterGame();
-    } catch(e) {
-        alert("Connection Error!");
-    }
+    myId = "p"+(Object.keys(d.players).length+1);
+    d.players[myId] = { name: myName, tiles: [] };
+    if(!d.scores[myId]) d.scores[myId] = 0;
+    
+    await updateDoc(ref, { players: d.players, scores: d.scores });
+    setTimeout(()=>drawTiles(7), 800);
+    enterGame();
   };
 
   function generateTiles(){
@@ -392,7 +378,7 @@
 
     let hasMove = canPlayAny(g);
     document.getElementById("drawBtnContainer").style.display = (isTurn && !hasMove && g.tiles.length > 0) ? "block" : "none";
-    document.getElementById("turnMsg").innerHTML = isTurn ? (hasMove ? `<span style="color:#4ade80">🟢 YOUR TURN</span>` : `<span style="color:#ff9800">⚠️ No moves! Draw card.</span>`) : `<span style="color:#aaa">Waiting for ${g.players[g.turn]?.name}...</span>`;
+    document.getElementById("turnMsg").innerHTdocument.getElementById("turnMsg").innerHTML = isTurn ? (hasMove ? `<span style="color:#4ade80">🟢 YOUR TURN</span>` : `<span style="color:#ff9800">⚠️ No moves! Draw card.</span>`) : `<span style="color:#aaa">Waiting for ${g.players[g.turn]?.name}...</span>`;
 
     let bDiv = document.getElementById("boardScroll");
     bDiv.innerHTML = "";
@@ -425,7 +411,9 @@
        }
     });
     window.remainingTiles = g.tiles.length;
-    updateChat(g.chats || []);
+    
+    // Render Chat
+    if(g.chats) updateChat(g.chats);
 
     setTimeout(() => {
         let bs = document.getElementById("boardScroll"), ba = document.getElementById("boardArea");
@@ -442,6 +430,7 @@
       return g.players[myId].tiles.some(t => t.a===h || t.b===h || t.a===tl || t.b===tl);
   }
 
+  // --- ACTIONS ---
   window.openBoneyard = () => {
       let grid = document.getElementById("boneyardGrid");
       grid.innerHTML = "";
@@ -520,7 +509,7 @@
       div.scrollTop = div.scrollHeight;
   }
 
-  // --- VIDEO CALL (FIXED FOR MOBILE) ---
+  // --- VIDEO CALL (FORCED MODE) ---
   let jitsiApi = null;
   window.toggleVideo = () => {
       let box = document.getElementById("videoContainer");
@@ -536,22 +525,28 @@
   function startJitsi(){
       const domain = 'meet.jit.si';
       const options = {
-          roomName: 'DominoRoom_' + roomId, // Simple Room Name
+          roomName: 'DominoPro_' + roomId,
           width: '100%', height: '100%',
           parentNode: document.querySelector('#jitsiFrame'),
           userInfo: { displayName: myName },
           configOverwrite: { 
               startWithVideoMuted: false, 
-              disableDeepLinking: true // STOP APP REDIRECT
+              prejoinPageEnabled: false, 
+              disableDeepLinking: true 
           },
           interfaceConfigOverwrite: { 
-              MOBILE_APP_PROMO: false, // HIDE DOWNLOAD APP
+              MOBILE_APP_PROMO: false,
               TOOLBAR_BUTTONS: ['microphone', 'camera', 'hangup', 'tileview'],
               SHOW_JITSI_WATERMARK: false
           }
       };
       jitsiApi = new JitsiMeetExternalAPI(domain, options);
   }
+
+  // Fallback if embed fails
+  window.openExternalVideo = () => {
+      window.open('https://meet.jit.si/DominoPro_' + roomId, '_blank');
+  };
 </script>
 </body>
 </html>
