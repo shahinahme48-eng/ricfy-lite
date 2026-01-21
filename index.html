@@ -123,6 +123,71 @@
     #sendBtn { padding: 0 15px; background: #3b82f6; color: white; border: none; cursor: pointer; }
 
     /* LOGIN SCREEN */
+    #login { 
+      position: absolute; top:0; left:0; width:100%; height:100%; 
+      background: radial-gradient(circle at center, #1a202c 0%, #000 100%); 
+      z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; 
+    }
+    
+    /* ইনপুট বক্স স্টাইল */
+    input, select { 
+      padding: 15px; margin: 10px; border-radius: 30px; 
+      border: 2px solid #333; background: #222; color: #fff; 
+      text-align: center; font-size: 16px; width: 260px; outline: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      transition: 0.3s;
+    }
+    input:focus { border-color: gold; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
+
+    /* বাটন স্টাইল */
+    .btn { 
+      padding: 15px 40px; margin: 10px; border-radius: 30px; 
+      border: none; font-weight: bold; cursor: pointer; font-size: 18px; 
+      text-transform: uppercase; letter-spacing: 1px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn:active { transform: scale(0.95); }
+    
+    .btn-gold { 
+      background: linear-gradient(to right, #facc15, #b45309); 
+      color: black; 
+      box-shadow: 0 0 20px rgba(250, 204, 21, 0.4);
+    }
+    
+    .btn-white {
+      background: white; color: black;
+      box-shadow: 0 0 15px rgba(255,255,255,0.2);
+    }
+```
+
+এবং আপনার **Join Button** এর কোডটি একটু আপডেট করুন যাতে ছোট হাতের লিখলেও সেটা অটোমেটিক বড় হাতের হয়ে যায় এবং স্পেস বা ভুল না হয়।
+
+আপনার `index.html` এর `window.joinRoom` ফাংশনটি এভাবে আপডেট করুন:
+
+```javascript
+  window.joinRoom = async () => {
+    myName = document.getElementById("pName").value || "Guest";
+    // কোডটি অটোমেটিক বড় হাতের হবে এবং স্পেস কেটে দিবে
+    roomId = document.getElementById("code").value.toUpperCase().trim();
+    
+    if(!roomId) return alert("Please enter a Room Code!");
+
+    const ref = doc(db,"rooms",roomId);
+    const snap = await getDoc(ref);
+    
+    if(!snap.exists()) return alert("Invalid Room Code! Ask host for correct code.");
+    
+    let d = snap.data();
+    if(Object.keys(d.players).length >= d.maxPlayers) return alert("Room is Full!");
+    
+    myId = "p"+(Object.keys(d.players).length+1);
+    d.players[myId] = { name: myName, tiles: [] };
+    if(!d.scores[myId]) d.scores[myId] = 0;
+    
+    await updateDoc(ref, { players: d.players, scores: d.scores });
+    setTimeout(()=>drawTiles(7), 800);
+    enterGame();
+  };
     #login { position: absolute; top:0; left:0; width:100%; height:100%; background: #111; z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
     input, select { padding: 12px; margin: 8px; border-radius: 8px; border: 1px solid #333; background:#222; color:white; text-align: center; font-size: 16px; width: 240px; }
     .btn { padding: 12px 30px; margin: 5px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; }
