@@ -5,12 +5,11 @@
   <title>Domino Pro Ultimate</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- JITSI API -->
   <script src='https://meet.jit.si/external_api.js'></script>
   
   <style>
     /* --- CORE STYLES --- */
-    body { margin: 0; background: #0f172a; overflow: hidden; font-family: 'Segoe UI', sans-serif; user-select: none; }
+    body { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; user-select: none; }
 
     /* TABLE */
     #table {
@@ -27,7 +26,7 @@
     /* SCOREBOARD */
     .scoreboard {
       position: absolute; top: 70px; left: 50%; transform: translateX(-50%);
-      background: rgba(0,0,0,0.8); padding: 5px 15px; border-radius: 20px;
+      background: rgba(0,0,0,0.8); padding: 5px 15px; border-radius: 15px;
       color: gold; font-size: 12px; border: 1px solid #555; z-index: 15;
       display: flex; gap: 15px; box-shadow: 0 5px 15px black;
     }
@@ -94,40 +93,34 @@
     .draw-btn-pulse { background: linear-gradient(to bottom, #ff9800, #e65100); color: white; padding: 10px 25px; border-radius: 30px; border: 2px solid white; animation: pulseBtn 0.8s infinite alternate; cursor:pointer; font-weight:bold; font-size: 14px; box-shadow: 0 0 20px #ff9800;}
     @keyframes pulseBtn { from { transform: scale(1); } to { transform: scale(1.1); } }
 
-    /* VIDEO CALL (FLOATING WINDOW) */
+    /* VIDEO CALL (RESIZABLE & FIXED) */
     #videoContainer { 
-        display: none; position: absolute; top: 60px; right: 10px; width: 140px; height: 200px; 
-        background: #000; border: 3px solid #22c55e; border-radius: 15px; 
-        z-index: 80; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.8);
-        transition: all 0.3s;
+        display: none; position: absolute; top: 100px; right: 10px; 
+        width: 250px; height: 300px; /* Initial Big Size */
+        background: #000; border: 2px solid gold; border-radius: 10px; 
+        z-index: 80; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.9);
+        transition: all 0.3s ease;
     }
-    #videoContainer.expanded { width: 300px; height: 400px; }
-    #videoToggleBtn { position: absolute; top: 15px; right: 10px; z-index: 90; background: #128C7E; color: white; border: none; padding: 8px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 5px black; }
-    #closeVideo { position: absolute; top: 5px; right: 5px; background: red; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; z-index: 100; font-size: 12px; font-weight: bold; }
+    /* Small Mode Class */
+    #videoContainer.minimized { width: 120px; height: 160px; border-color: #4ade80; }
+
+    #videoToggleBtn { position: absolute; top: 15px; right: 10px; z-index: 90; background: #e11d48; color: white; border: none; padding: 8px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 5px; }
+    
+    /* Video Controls */
+    .vid-ctrl { position: absolute; top: 5px; width: 24px; height: 24px; border-radius: 50%; border: none; color: white; cursor: pointer; font-weight: bold; z-index: 100; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+    #closeVideo { right: 5px; background: red; }
+    #resizeVideo { right: 35px; background: #3b82f6; }
+
     iframe { border: none; width: 100%; height: 100%; }
 
-    /* WHATSAPP STYLE CHAT */
-    #chatIcon { position: absolute; bottom: 130px; right: 20px; z-index: 50; width: 55px; height: 55px; background: #25D366; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 28px; box-shadow: 0 4px 10px #128C7E; cursor: pointer; transition: transform 0.2s; }
-    #chatIcon:active { transform: scale(0.9); }
-    
-    #chatBox { 
-        display: none; position: absolute; bottom: 195px; right: 20px; width: 280px; height: 350px; 
-        background: #efe7dd; /* WhatsApp BG Color */
-        background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-        border: 2px solid #ccc; border-radius: 15px; z-index: 60; flex-direction: column; overflow: hidden; 
-        box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-    }
-    #chatHeader { background: #128C7E; color: white; padding: 10px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-    #chatMessages { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
-    
-    .chat-bubble { padding: 8px 12px; border-radius: 10px; max-width: 80%; font-size: 13px; position: relative; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-    .my-msg { align-self: flex-end; background: #dcf8c6; color: black; border-bottom-right-radius: 0; }
-    .other-msg { align-self: flex-start; background: white; color: black; border-bottom-left-radius: 0; }
-    .sender-name { font-size: 10px; color: #555; display: block; margin-bottom: 2px; }
-
-    .chat-input-area { display: flex; padding: 5px; background: #f0f0f0; align-items: center; gap: 5px; }
-    #chatInp { flex: 1; padding: 10px; border: none; background: white; border-radius: 20px; outline: none; font-size: 14px; }
-    #sendBtn { width: 40px; height: 40px; background: #128C7E; color: white; border: none; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 16px; }
+    /* CHAT */
+    #chatIcon { position: absolute; bottom: 130px; right: 20px; z-index: 50; width: 50px; height: 50px; background: #3b82f6; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 24px; box-shadow: 0 0 15px #3b82f6; cursor: pointer; }
+    #chatBox { display: none; position: absolute; bottom: 190px; right: 20px; width: 250px; height: 300px; background: rgba(0,0,0,0.9); border: 2px solid #333; border-radius: 10px; z-index: 60; flex-direction: column; overflow: hidden; }
+    #chatMessages { flex: 1; overflow-y: auto; padding: 10px; font-size: 12px; color: white; display: flex; flex-direction: column; gap: 5px; }
+    .chat-bubble { background: #333; padding: 5px 10px; border-radius: 10px; max-width: 80%; word-wrap: break-word; }
+    .chat-input-area { display: flex; border-top: 1px solid #333; }
+    #chatInp { flex: 1; padding: 10px; border: none; background: #222; color: white; outline: none; }
+    #sendBtn { padding: 0 15px; background: #3b82f6; color: white; border: none; cursor: pointer; }
 
     /* LOGIN SCREEN */
     #login { position: absolute; top:0; left:0; width:100%; height:100%; background: #111; z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
@@ -150,6 +143,7 @@
 <div id="login">
   <img src="https://cdn-icons-png.flaticon.com/512/566/566324.png" width="80" style="margin-bottom:20px;">
   <h1 style="margin:0; text-transform:uppercase; letter-spacing:2px; color:#facc15;">Domino Pro</h1>
+  <p style="color:#888; font-size:12px; margin-bottom:20px;">Sound 🔊 | Vibration 📳 | Video 🎥</p>
   
   <input id="pName" placeholder="Enter Your Nickname">
   
@@ -203,10 +197,11 @@
   <!-- SCOREBOARD -->
   <div class="scoreboard" id="scoreboard"></div>
 
-  <!-- VIDEO CALL -->
-  <button id="videoToggleBtn" onclick="toggleVideo()">🎥 Call</button>
+  <!-- VIDEO CALL (RESIZABLE) -->
+  <button id="videoToggleBtn" onclick="toggleVideo()">🎥 Live Video</button>
   <div id="videoContainer">
-      <button id="closeVideo" onclick="toggleVideo()">X</button>
+      <button id="closeVideo" class="vid-ctrl" onclick="toggleVideo()">✖</button>
+      <button id="resizeVideo" class="vid-ctrl" onclick="resizeVideo()">➖</button>
       <iframe id="videoFrame" allow="camera; microphone; display-capture; autoplay" src=""></iframe>
   </div>
 
@@ -221,17 +216,13 @@
     <button class="draw-btn-pulse" onclick="openBoneyard()">🎲 DRAW CARD</button>
   </div>
 
-  <!-- CHAT (WHATSAPP STYLE) -->
-  <div id="chatIcon" onclick="toggleChat()"><i class="fab fa-whatsapp"></i></div>
+  <!-- CHAT -->
+  <div id="chatIcon" onclick="toggleChat()">💬</div>
   <div id="chatBox">
-    <div id="chatHeader">
-        <span>Group Chat</span>
-        <span onclick="toggleChat()" style="cursor:pointer;">✖</span>
-    </div>
     <div id="chatMessages"></div>
     <div class="chat-input-area">
-        <input id="chatInp" placeholder="Type a message...">
-        <button id="sendBtn" onclick="sendChat()"><i class="fas fa-paper-plane"></i></button>
+        <input id="chatInp" placeholder="Type message...">
+        <button id="sendBtn" onclick="sendChat()">➤</button>
     </div>
   </div>
 
@@ -269,14 +260,12 @@
   const sndClick = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_c8c8a73467.mp3");
   const sndWin = new Audio("https://cdn.pixabay.com/audio/2021/08/04/audio_12b0c7443c.mp3");
   const sndTurn = new Audio("https://cdn.pixabay.com/audio/2022/03/24/audio_824e883b63.mp3");
-  const sndMsg = new Audio("https://cdn.pixabay.com/audio/2021/08/09/audio_88447e769f.mp3"); // New Message Sound
 
   function playSound(type) {
       try {
           if(type==='click') { sndClick.currentTime=0; sndClick.play(); }
           if(type==='win') { sndWin.currentTime=0; sndWin.play(); }
           if(type==='turn') { sndTurn.currentTime=0; sndTurn.play(); }
-          if(type==='msg') { sndMsg.currentTime=0; sndMsg.play(); }
       } catch(e){}
   }
   function vibrate() { if(navigator.vibrate) navigator.vibrate(200); }
@@ -300,7 +289,7 @@
       board: [], tiles: tiles, turn: "p1", status: "playing",
       targetScore: target, maxPlayers: maxP, scores: { p1: 0 },
       players: { p1: { name: myName, tiles: [] } },
-      chats: []
+      chats: [] // Added for Chat
     });
     setTimeout(()=>drawTiles(7), 800);
     enterGame();
@@ -377,7 +366,8 @@
             document.getElementById("winPoints").innerText = "REACHED TARGET SCORE!";
             document.getElementById("nextRoundBtn").style.display = "none";
             document.getElementById("mainMenuBtn").style.display = "inline-block";
-            document.getElementById("waitMsg").style.display = "none";} else {
+            document.getElementById("waitMsg").style.display = "none";
+        } else {
             document.getElementById("winTitle").innerText = "ROUND WINNER";
             document.getElementById("winnerName").innerText = wName;
             document.getElementById("winPoints").innerText = "+" + earned + " Points";
@@ -400,7 +390,7 @@
     else if(!isTurn) { lastTurnState = null; }
 
     let hasMove = canPlayAny(g);
-    document.getElementById("drawBtnContainer").style.display = (isTurn && !hasMove && g.tiles.length > 0) ? "block" : "none";
+    document.getElementById("drawBtnContainer".style.display = (isTurn && !hasMove && g.tiles.length > 0) ? "block" : "none";
     document.getElementById("turnMsg").innerHTML = isTurn ? (hasMove ? `<span style="color:#4ade80">🟢 YOUR TURN</span>` : `<span style="color:#ff9800">⚠️ No moves! Draw card.</span>`) : `<span style="color:#aaa">Waiting for ${g.players[g.turn]?.name}...</span>`;
 
     let bDiv = document.getElementById("boardScroll");
@@ -435,8 +425,8 @@
     });
     window.remainingTiles = g.tiles.length;
     
-    // Update Chat
-    if(g.chats && g.chats.length > 0) updateChat(g.chats);
+    // Render Chat
+    if(g.chats) updateChat(g.chats);
 
     setTimeout(() => {
         let bs = document.getElementById("boardScroll"), ba = document.getElementById("boardArea");
@@ -547,19 +537,32 @@
       div.scrollTop = div.scrollHeight;
   }
 
-  // --- VIDEO CALL (MiroTalk) ---
+  // --- VIDEO CALL (FIXED RESIZABLE) ---
   window.toggleVideo = () => {
       let box = document.getElementById("videoContainer");
       let frame = document.getElementById("videoFrame");
+      
       if(box.style.display === "block"){
           box.style.display = "none";
           frame.src = "";
       } else {
           box.style.display = "block";
-          frame.src = "https://p2p.mirotalk.com/join/" + roomId;
+          frame.src = "https://p2p.mirotalk.com/join/" + roomId + "?video=true&audio=true";
+      }
+  };
+
+  window.resizeVideo = () => {
+      let box = document.getElementById("videoContainer");
+      let btn = document.getElementById("resizeVideo");
+      
+      if(box.classList.contains("minimized")){
+          box.classList.remove("minimized");
+          btn.innerText = "➖"; // Show Minimize Icon
+      } else {
+          box.classList.add("minimized");
+          btn.innerText = "➕"; // Show Maximize Icon
       }
   };
 </script>
 </body>
 </html>
-```
